@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>CamTurn.Core</RootNamespace>
+    <Description>Pure CamTurn logic: orientation math, sensor and camera abstractions, frame operations. No OS calls.</Description>
+  </PropertyGroup>
+</Project>

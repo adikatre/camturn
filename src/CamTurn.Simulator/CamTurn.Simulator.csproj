@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>CamTurn.Simulator</RootNamespace>
+    <Description>Software model ("digital twin") of a 2-in-1 convertible: lid/base accelerometers, hinge, Windows auto-rotate, and a lid-fixed webcam.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CamTurn.Core\CamTurn.Core.csproj" />
+  </ItemGroup>
+</Project>

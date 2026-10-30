@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6F20FD06-B9DE-4B9A-B66B-3799736F045B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CamTurn.Core", "src\CamTurn.Core\CamTurn.Core.csproj", "{0D467A1B-6EEE-4260-9FC6-0543C2887A49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CamTurn.Simulator", "src\CamTurn.Simulator\CamTurn.Simulator.csproj", "{8AE2370A-CABE-40BD-91F4-B39A16EC153E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CamTurn.Sim.Cli", "src\CamTurn.Sim.Cli\CamTurn.Sim.Cli.csproj", "{F76A3D58-619F-4670-8123-0C8A6C115482}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9D7180D0-D5F2-4D05-9B2E-ED94559F424B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CamTurn.Core.Tests", "tests\CamTurn.Core.Tests\CamTurn.Core.Tests.csproj", "{AFBF5417-100D-4631-B2E5-2F4E94E13F10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CamTurn.Simulator.Tests", "tests\CamTurn.Simulator.Tests\CamTurn.Simulator.Tests.csproj", "{6F50DFA7-F2FC-49F1-AA1F-842EB5F0777B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D467A1B-6EEE-4260-9FC6-0543C2887A49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D467A1B-6EEE-4260-9FC6-0543C2887A49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D467A1B-6EEE-4260-9FC6-0543C2887A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D467A1B-6EEE-4260-9FC6-0543C2887A49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AE2370A-CABE-40BD-91F4-B39A16EC153E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AE2370A-CABE-40BD-91F4-B39A16EC153E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AE2370A-CABE-40BD-91F4-B39A16EC153E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AE2370A-CABE-40BD-91F4-B39A16EC153E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F76A3D58-619F-4670-8123-0C8A6C115482}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F76A3D58-619F-4670-8123-0C8A6C115482}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F76A3D58-619F-4670-8123-0C8A6C115482}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F76A3D58-619F-4670-8123-0C8A6C115482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFBF5417-100D-4631-B2E5-2F4E94E13F10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFBF5417-100D-4631-B2E5-2F4E94E13F10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFBF5417-100D-4631-B2E5-2F4E94E13F10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFBF5417-100D-4631-B2E5-2F4E94E13F10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F50DFA7-F2FC-49F1-AA1F-842EB5F0777B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F50DFA7-F2FC-49F1-AA1F-842EB5F0777B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F50DFA7-F2FC-49F1-AA1F-842EB5F0777B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F50DFA7-F2FC-49F1-AA1F-842EB5F0777B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0D467A1B-6EEE-4260-9FC6-0543C2887A49} = {6F20FD06-B9DE-4B9A-B66B-3799736F045B}
+		{8AE2370A-CABE-40BD-91F4-B39A16EC153E} = {6F20FD06-B9DE-4B9A-B66B-3799736F045B}
+		{F76A3D58-619F-4670-8123-0C8A6C115482} = {6F20FD06-B9DE-4B9A-B66B-3799736F045B}
+		{AFBF5417-100D-4631-B2E5-2F4E94E13F10} = {9D7180D0-D5F2-4D05-9B2E-ED94559F424B}
+		{6F50DFA7-F2FC-49F1-AA1F-842EB5F0777B} = {9D7180D0-D5F2-4D05-9B2E-ED94559F424B}
+	EndGlobalSection
+EndGlobal
