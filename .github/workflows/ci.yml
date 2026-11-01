@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+jobs:
+  linux:
+    name: Linux (core, simulator, portable C++)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: No OBS references
+        run: scripts/check-no-obs.sh
+      - name: Format (.NET)
+        run: dotnet format CamTurn.sln --verify-no-changes
+      - name: Format (C++)
+        run: |
+          clang-format --dry-run --Werror \
+            src/CamTurn.MediaSource/include/camturn/*.h \
+            src/CamTurn.MediaSource/src/*/*.cpp src/CamTurn.MediaSource/src/*/*.h \
+            src/CamTurn.MediaSource/tests/*.cpp
+      - name: Build (all projects, Windows ones via EnableWindowsTargeting)
+        run: dotnet build CamTurn.sln -c Release
+      - name: Test with coverage
+        run: |
+          dotnet test tests/CamTurn.Core.Tests -c Release --no-build --collect:"XPlat Code Coverage" --results-directory artifacts/test-results
+          dotnet test tests/CamTurn.Simulator.Tests -c Release --no-build --collect:"XPlat Code Coverage" --results-directory artifacts/test-results
+      - name: Simulator scenarios
+        run: dotnet run --project src/CamTurn.Sim.Cli -c Release --no-build -- --run-all
+      - name: Portable C++ tests
+        run: |
+          cmake -S src/CamTurn.MediaSource -B artifacts/native -DCMAKE_BUILD_TYPE=Release
+          cmake --build artifacts/native
+          ctest --test-dir artifacts/native --output-on-failure
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-linux
+          path: artifacts/test-results/**/coverage.cobertura.xml
+
+  windows:
+    name: Windows (MSVC, WPF, integration tests, installer)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Install Inno Setup if missing
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup --no-progress -y }
+      - name: Build, test, publish, installer
+        shell: pwsh
+        run: ./build/build-windows.ps1 -Version 0.1.0-ci.${{ github.run_number }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camturn-installer
+          path: |
+            artifacts/installer/*.exe
+            artifacts/installer/*.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-windows
+          path: artifacts/test-results/**/coverage.cobertura.xml
+
+  install-smoke:
+    name: Install smoke test (experimental, Windows Server 2025)
+    needs: windows
+    runs-on: windows-2025
+    # Server SKUs may lack the Frame Server camera stack; this job reports what works rather than gating merges.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: camturn-installer
+          path: installer
+      - name: Install, register, diagnose, uninstall
+        shell: pwsh
+        run: ./build/smoke-test.ps1 -Installer (Get-ChildItem installer -Filter *.exe | Select-Object -First 1).FullName

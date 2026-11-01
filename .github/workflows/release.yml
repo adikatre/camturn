@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Install Inno Setup if missing
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup --no-progress -y }
+      - name: Build installer
+        shell: pwsh
+        run: ./build/build-windows.ps1 -Version ("${{ github.ref_name }}".TrimStart('v'))
+      - name: Draft GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $files = Get-ChildItem artifacts/installer -Include *.exe,*.sha256 -Recurse | ForEach-Object FullName
+          gh release create "${{ github.ref_name }}" $files --draft --title "CamTurn ${{ github.ref_name }}" --notes "See CHANGELOG.md. Installers are not code-signed yet; Windows SmartScreen will warn (see README)."

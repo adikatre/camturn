@@ -29,6 +29,7 @@ public static class Cli
                 CliCommand.Register => Register(o),
                 CliCommand.Unregister => Unregister(o),
                 CliCommand.PipeProbe => await PipeProbeAsync(),
+                CliCommand.SetAutostart => SetAutostart(o.AutostartOn),
                 _ => 2,
             };
         }
@@ -136,6 +137,24 @@ public static class Cli
     {
         new VirtualCameraRegistrar().Unregister(allUsers: !o.CurrentUserOnly);
         Console.WriteLine("\"CamTurn Camera\" removed.");
+        return 0;
+    }
+
+    private static int SetAutostart(bool on)
+    {
+        var path = AppPaths.ConfigFile;
+        var config = ConfigStore.Load(path).Config;
+        ConfigStore.Save(config with { StartWithWindows = on }, path);
+        if (on)
+        {
+            Autostart.Enable(Environment.ProcessPath!, minimized: true);
+        }
+        else
+        {
+            Autostart.Disable();
+        }
+
+        Console.WriteLine(on ? "CamTurn will start when you sign in." : "CamTurn will not start automatically.");
         return 0;
     }
 
