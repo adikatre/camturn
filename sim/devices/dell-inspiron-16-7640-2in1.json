@@ -1,12 +1,12 @@
 {
-  // Simulated profile of the developer's test device. Values marked in "assumptions" have NOT been
-  // checked on the real machine. Replace them with real `camturn --diagnose` / `--sensor-dump` output.
+  // Profile of the developer's test device. Confirmed facts come from scripts/probe-device.ps1 run on the
+  // real laptop on 2026-11-01 (see docs/KNOWN_ISSUES.md). Entries in "assumptions" are still unverified.
   "id": "dell-inspiron-16-7640-2in1",
   "displayName": "Dell Inspiron 16 7640 2-in-1 (simulated)",
-  "notes": "Convertible with 360-degree hinge. Model name as given by the developer; the Inspiron 16 Plus 7640 is a different, non-convertible laptop.",
-  "panel": { "nativeWidth": 1920, "nativeHeight": 1200, "diagonalInches": 16.0, "touch": true },
+  "notes": "Probe 2026-11-01: Dell Inc. Inspiron 16 7640 2-in-1, Windows 11 Home 26H2 build 26300, one lid accelerometer (Intel ISH, VID_8087&PID_0AC2), no hinge sensor, Realtek front webcam VID_0BDA&PID_5583.",
+  "panel": { "nativeWidth": 3840, "nativeHeight": 2160, "diagonalInches": 16.0, "touch": true },
   "camera": {
-    "id": "SIM\\USB#VID_0000&PID_0000&MI_00#LIDCAM",
+    "id": "SIM\\USB#VID_0BDA&PID_5583&MI_00#LIDCAM",
     "name": "Integrated Webcam",
     "panel": "Front",
     "mountRotationDegrees": 0,
@@ -26,32 +26,21 @@
         "isDefault": true,
         "reportIntervalMs": 16,
         "noiseG": 0.02
-      },
-      {
-        "id": "SIM\\SENSORS#ACCEL_BASE",
-        "name": "Accelerometer (base)",
-        "location": "Base",
-        "isDefault": false,
-        "reportIntervalMs": 16,
-        "noiseG": 0.02
       }
     ],
-    "hingeAngle": { "id": "SIM\\SENSORS#HINGE", "name": "Hinge Angle Sensor" },
     "simpleOrientation": { "id": "SIM\\SENSORS#SIMPLE_ORIENTATION", "name": "Simple Device Orientation Sensor" }
   },
   "windows": {
-    "osBuild": "10.0.26100 (simulated Windows 11 24H2)",
+    "osBuild": "10.0.26300 (simulated Windows 11 26H2)",
     "autoRotateOnlyInSlate": true,
     "slateWhenHingeAboveDegrees": 190,
     "rotationLockedAtStart": false
   },
   "assumptions": [
-    { "id": "A1", "about": "Sensor layout", "assumed": "Two accelerometers (lid = default, base) and a hinge-angle sensor are exposed to WinRT.", "verifyWith": "camturn --diagnose (sensor enumeration section)" },
-    { "id": "A2", "about": "Lid accelerometer axes", "assumed": "Windows convention: +X right, +Y up, +Z out of screen; upright panel reads y = -1 g.", "verifyWith": "camturn --sensor-dump while holding the device upright, then right edge down" },
+    { "id": "A2", "about": "Lid accelerometer axes", "assumed": "Windows convention: +X right, +Y up, +Z out of screen. Confirmed for laptop pose (y = -0.98, z = -0.165); the sign of X (portrait poses) is unverified.", "verifyWith": "probe-device.ps1 -Poses (tablet portrait right/left)" },
     { "id": "A3", "about": "Camera mounting", "assumed": "Webcam sensor is not rotated relative to the panel (mountRotationDegrees = 0).", "verifyWith": "Windows Camera app in laptop mode shows an upright image" },
-    { "id": "A4", "about": "Camera formats", "assumed": "MJPG 1080p30/720p30, NV12 720p30, YUY2 480p30.", "verifyWith": "camturn --list-cameras" },
-    { "id": "A5", "about": "Panel", "assumed": "16-inch 1920x1200 native landscape touch panel.", "verifyWith": "Settings > System > Display" },
+    { "id": "A4", "about": "Camera formats", "assumed": "MJPG 1080p30/720p30, NV12 720p30, YUY2 480p30 (probe found the camera but did not list formats).", "verifyWith": "probe-device.ps1 v2 or camturn --list-cameras" },
     { "id": "A6", "about": "Windows auto-rotate", "assumed": "Desktop only auto-rotates in slate posture (hinge > ~190 degrees).", "verifyWith": "Fold into tent/tablet with rotation lock off and observe" },
-    { "id": "A7", "about": "Accelerometer noise and rate", "assumed": "~0.02 g per axis, 16 ms report interval.", "verifyWith": "camturn --sensor-dump with the device still on a desk" }
+    { "id": "A7", "about": "Accelerometer noise and rate", "assumed": "~0.02 g per axis, 16 ms report interval.", "verifyWith": "camturn --sensor-dump with the device still on a desk (probe: min report interval 10 ms)" }
   ]
 }
