@@ -2,6 +2,8 @@
 
 #include "camturn/protocol.h"
 
+#include <algorithm>
+
 namespace camturn
 {
 
