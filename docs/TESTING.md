@@ -1,9 +1,8 @@
 # Testing
 
-Three layers: automated tests that run anywhere, Windows integration tests (CI and the laptop), and a manual
-plan for the laptop. **As of 2026-11-01 only the first layer has actually been run** (on Linux). The Windows
-layers are written but haven't run yet: the GitHub repository and CI aren't set up, and no Windows machine was
-available to the author.
+Three layers: automated tests that run anywhere, Windows tests on CI, and a manual plan for the laptop.
+As of 2026-11-01, layers 1 and 2 run on every push (GitHub Actions: Ubuntu, and Windows Server 2025). Layer 3
+(real hardware and real apps) hasn't been run yet.
 
 ## 1. Automated, cross-platform (run: yes, on Linux)
 
@@ -37,7 +36,7 @@ Measured on the dev container (cloud VM, 4 vCPU, Release build):
   core at 30 fps (`CompositorCostAt1080pInput`).
 - Simulated laptop → tent fold: upright output **0.73 s** after the motion starts (target ≤ 1 s).
 
-## 2. Windows integration tests (run: not yet)
+## 2. Windows integration tests (run: yes, on CI)
 
 `tests/CamTurn.Windows.Tests` runs on CI (`windows-latest`) and can run on the laptop:
 
@@ -49,10 +48,17 @@ It covers the HKCU autostart round trip, the pipe DACL contents (user, LocalServ
 denied), a pipe round trip with real ACLs, virtual camera state reporting, sensor and camera enumeration, diagnostics
 redaction, and CLI parsing. On machines without sensors or cameras, those tests only check that the APIs answer.
 
-`build/smoke-test.ps1 -Installer <setup.exe>` installs silently, checks the HKLM registration, runs
-`--diagnose` and `--pipe-probe` against `--test-pattern --simulate-orientation 180`, uninstalls, and checks for
-leftovers. CI runs it on Windows Server 2025 as an experiment. Run it on a fresh Windows 11 VM for acceptance
-criterion 6.
+`build/smoke-test.ps1 -Installer <setup.exe>`:
+1. Installs silently and checks the HKLM registration and that "CamTurn Camera" is visible to apps.
+2. Runs `--probe-virtual-camera` without the app (expects the media source's placeholder).
+3. Starts `--test-pattern --simulate-orientation 180`, runs `--pipe-probe`, and runs `--probe-virtual-camera` again
+   (expects the upright test pattern through Frame Server: acceptance criterion 1 without a human).
+4. Uninstalls and checks for leftovers.
+
+CI runs it on Windows Server 2025. Run it on a fresh Windows 11 VM for acceptance criterion 6.
+
+The main Windows CI job also launches the published `CamTurn.exe --diagnose`, so a broken manifest or missing
+dependency fails the build. `scripts/check-xml.py` rejects malformed XML (manifests, project files, XAML).
 
 ## 3. Manual plan on the laptop (run: not yet)
 
@@ -108,9 +114,8 @@ row, record pass/fail, the app version and notes.
 | I5 | Uninstall | CamTurn Camera disappears from apps; `HKLM\Software\Classes\CLSID\{EF0883BB-…}` gone; `C:\Program Files\CamTurn` gone (or gone after reboot); HKCU Run value gone; `%APPDATA%\CamTurn` gone |
 | I6 | `build/smoke-test.ps1` on the VM | All checks pass |
 
-## What could not be run by the author
+## What has not been run yet
 
-Everything in sections 2 and 3: the MSVC build of the media source and helper DLL, Frame Server loading the
-media source, LocalService connecting through the pipe ACL, `MFCreateVirtualCamera` registration, WinRT sensors and
-camera capture, the WPF UI, the installer, and all app compatibility. These are the first things to check on the
-laptop. The most likely failure points are listed in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+Section 3: real sensors and the real webcam, the WPF UI, and every third-party app (Teams, Zoom, Meet, Discord),
+plus CPU measurements on the laptop. CI VMs have no camera, accelerometer or interactive desktop. The most likely
+failure points are listed in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
