@@ -38,10 +38,26 @@ disabled and only Manual rotation is offered.
 
 ## D-004 — Tooling for this stage (2026-10-30)
 
-- .NET 8 SDK pinned via `global.json` (`rollForward: latestFeature`); warnings are errors.
+- .NET SDK pinned via `global.json` (`rollForward: latestFeature`); warnings are errors. (Retargeted to .NET 10 by D-005.)
 - No third-party runtime dependencies in Core/Simulator. PNG output is a small in-house encoder over
   `System.IO.Compression.ZLibStream`, so there are no extra licenses to track. Tests use xUnit (Apache-2.0) and
   Microsoft.NET.Test.Sdk (MIT).
+
+## D-005 — .NET 10 LTS instead of .NET 8 (2026-11-01)
+
+The handoff defaulted to .NET 8, but .NET 8 support ends on 2026-11-10. A new app shouldn't ship on a runtime
+that stops getting security fixes the week it's built. All projects target `net10.0` (LTS, supported to
+November 2028) and `net10.0-windows10.0.22621.0` for Windows code. Package versions are managed centrally in
+`Directory.Packages.props`.
+
+## D-006 — `ReadingTransform`: there is no `DisplayOrientations.Native` (2026-11-01)
+
+The handoff asked for `ReadingTransform = DisplayOrientations.Native`. No such value exists. Per the WinRT docs,
+`ReadingTransform` aligns readings with the display orientation you pass, relative to the panel's native
+orientation. CamTurn therefore sets it to the panel's native orientation (`Landscape` on every convertible
+laptop seen so far), so readings stay in the panel frame however the desktop is rotated. `probe-device.ps1`
+records readings with the default and with `Landscape`, plus a step with the desktop manually rotated, to
+confirm this on the Inspiron (KNOWN_ISSUES K-4).
 
 ## Open questions
 
