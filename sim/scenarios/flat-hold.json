@@ -1,0 +1,16 @@
+{
+  "name": "flat-hold",
+  "description": "Portrait tablet laid flat on a table: keep the last orientation, report 'holding', never rotate on noise.",
+  "steps": [
+    { "at": 0, "pose": "tablet-portrait-left" },
+    { "at": 1.0, "pose": "flat-face-up", "transition": 0.5 },
+    { "at": 3.0, "roll": 0, "tilt": 85, "hinge": 360 },
+    { "at": 4.5, "pose": "tablet-portrait-left", "transition": 0.5 }
+  ],
+  "expect": [
+    { "at": 0.8, "quadrant": 270, "holding": false },
+    { "at": 2.5, "quadrant": 270, "holding": true },
+    { "at": 4.0, "quadrant": 270, "holding": true },
+    { "at": 5.5, "quadrant": 270, "holding": false, "outputUpright": true }
+  ]
+}

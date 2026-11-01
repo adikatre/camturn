@@ -1,0 +1,25 @@
+{
+  // Variant of the Inspiron profile for the case the handoff warns about: Windows only exposes an
+  // accelerometer in the base. CamTurn must then fall back to base sensor + hinge angle.
+  "id": "dell-inspiron-16-7640-2in1-base-only",
+  "displayName": "Dell Inspiron 16 7640 2-in-1 (simulated, base accelerometer only)",
+  "panel": { "nativeWidth": 1920, "nativeHeight": 1200, "diagonalInches": 16.0, "touch": true },
+  "camera": {
+    "id": "SIM\\USB#VID_0000&PID_0000&MI_00#LIDCAM",
+    "name": "Integrated Webcam",
+    "formats": [
+      { "subtype": "MJPG", "width": 1920, "height": 1080, "fps": 30 },
+      { "subtype": "NV12", "width": 1280, "height": 720, "fps": 30 }
+    ]
+  },
+  "sensors": {
+    "accelerometers": [
+      { "id": "SIM\\SENSORS#ACCEL_BASE", "name": "Accelerometer (base)", "location": "Base", "isDefault": true, "reportIntervalMs": 16, "noiseG": 0.02 }
+    ],
+    "hingeAngle": { "id": "SIM\\SENSORS#HINGE", "name": "Hinge Angle Sensor" },
+    "simpleOrientation": { "id": "SIM\\SENSORS#SIMPLE_ORIENTATION", "name": "Simple Device Orientation Sensor" }
+  },
+  "assumptions": [
+    { "id": "B1", "about": "Base frame axes", "assumed": "+X right of keyboard, +Y front edge toward hinge, +Z out of keyboard.", "verifyWith": "camturn --sensor-dump --all-sensors with base flat, then tilted toward the hinge" }
+  ]
+}

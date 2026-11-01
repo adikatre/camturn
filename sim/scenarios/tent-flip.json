@@ -1,0 +1,15 @@
+{
+  "name": "tent-flip",
+  "description": "Laptop on a desk, then folded into tent mode. Acceptance criterion 2: upright output within ~1 s.",
+  "steps": [
+    { "at": 0, "pose": "laptop" },
+    { "at": 2.0, "pose": "tent", "transition": 0.6 }
+  ],
+  "expect": [
+    { "at": 1.0, "quadrant": 0, "holding": false, "posture": "Laptop", "displayRotation": 0, "outputUpright": true },
+    { "at": 2.3, "outputUpright": false },
+    { "at": 3.6, "quadrant": 180, "posture": "Slate", "outputUpright": true },
+    { "at": 4.5, "quadrant": 180, "displayRotation": 180, "outputUpright": true }
+  ],
+  "keyframes": [1.0, 2.3, 3.6, 4.5]
+}

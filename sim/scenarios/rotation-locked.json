@@ -1,0 +1,11 @@
+{
+  "name": "rotation-locked",
+  "description": "Windows rotation lock is on: the desktop stays put, but CamTurn follows the raw sensor and still corrects the camera.",
+  "steps": [
+    { "at": 0, "pose": "tablet", "action": "lockRotation" },
+    { "at": 1.0, "pose": "tablet-portrait-right", "transition": 0.4 }
+  ],
+  "expect": [
+    { "at": 2.5, "quadrant": 90, "displayRotation": 0, "outputUpright": true }
+  ]
+}
