@@ -102,7 +102,39 @@ A ~100-line C++ DLL exports `CamTurn_IsVirtualCameraSupported`, `CamTurn_Registe
   only send the orientation. That design is simpler and more private, but harder to build and debug without
   hardware. Listed in ROADMAP.
 
+## D-011 — WPF tray app, not WinUI 3 (2026-11-01)
+
+WPF on .NET 10 builds on Linux CI (`EnableWindowsTargeting`), so every app change is compile-checked even
+without Windows. It ships unpackaged, which fits an installer that must also register a COM DLL in HKLM. It follows
+Windows light/dark through `ThemeMode="System"` (Fluent). The tray icon uses the built-in WinForms `NotifyIcon`,
+so no third-party tray library is needed. WinUI 3 would add the Windows App SDK runtime and has no first-party
+tray icon.
+
+## D-012 — Inno Setup installer, self-contained publish, no portable zip (2026-11-01)
+
+Inno Setup writes the HKLM COM registration declaratively, runs `CamTurn.exe --register` elevated and
+`--set-autostart` as the original user, replaces a locked media source DLL on reboot, and is available on GitHub's
+Windows runners. MSIX was rejected: packaged apps can't register an in-process COM server that an external
+service (Frame Server) loads. The app is published self-contained (win-x64), so users don't need to install the
+.NET Desktop Runtime. A portable zip isn't offered, because the media source must be registered under HKLM, which
+needs admin rights (VCamSample's documentation reports the same constraint).
+
+## D-013 — The engine lives in Core and is tested over a real pipe (2026-11-01)
+
+`CamTurnEngine` (consumers → controller → camera → compositor → pipe) and `FramePipeHost` depend only on
+abstractions and `Stream`. The same engine that ships on Windows is therefore exercised end to end on Linux
+(named pipes map to Unix sockets), with the simulated Inspiron and a managed stand-in for the media source.
+Only the thin Windows adapters and the C++ media source remain untested off Windows.
+
+## D-014 — Settings preview counts as a consumer (2026-11-01)
+
+The live preview needs the physical camera, so opening the settings window opens it, and the camera light comes
+on. The window says so. The camera closes 3 s after the window closes. Showing a stale or fake preview would hide
+what apps actually receive.
+
 ## Open questions
 
-- Repository name/owner (`adikatre/camturn` is a placeholder) and license. Not decided at this stage.
-- WinUI 3 vs WPF for the app (stage 4).
+- Repository: `adikatre/camturn` agreed with the developer (2026-11-01). Waiting for the empty repository to be
+  created on GitHub before pushing.
+- License: MIT, copyright Aditya Katre (confirmed 2026-11-01).
+- Code of Conduct contact: points to the maintainer's GitHub profile. A dedicated address could be added later.

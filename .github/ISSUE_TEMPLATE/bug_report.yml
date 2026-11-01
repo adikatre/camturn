@@ -1,0 +1,41 @@
+name: Bug report
+description: Something doesn't work as described
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please include the diagnostics output: it is redacted (no user name or paths) and tells us your Windows build, sensors, cameras and virtual camera state.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Fold into tent mode\n2. Open Teams and select CamTurn Camera\n3. ..."
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device model
+      placeholder: e.g. Dell Inspiron 16 7640 2-in-1
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: App using CamTurn Camera (and its version)
+      placeholder: e.g. Zoom 6.x, Teams (new), Chrome 140 / Google Meet
+  - type: textarea
+    id: diagnose
+    attributes:
+      label: Diagnostics
+      description: Run `"C:\Program Files\CamTurn\CamTurn.exe" --diagnose` in a terminal, or click "Copy diagnostics" in CamTurn's settings, and paste the output.
+      render: text
+    validations:
+      required: true
