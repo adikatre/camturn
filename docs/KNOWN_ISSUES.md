@@ -41,13 +41,17 @@ Everything here was **not** verified on real hardware. Each item says how to che
   rotated 180°, over the pipe.
 - When desktop camera access is off in Windows privacy settings, opening CamTurn Camera fails with CamTurn's
   "Camera access is blocked…" message, as intended.
+- **W-2 resolved:** opening "CamTurn Camera" with MediaCapture makes Frame Server load `camturn_mediasource.dll`.
+  Without the app it serves the placeholder (1,482 frames received, 1280×720).
+- **W-3 resolved:** with the app running `--test-pattern --simulate-orientation 180`, the media source (LocalService,
+  session 0) connects through the ACL'd pipe. The capture client receives the test pattern **upright (0.0° measured)**:
+  acceptance criterion 1's path, checked automatically by `--probe-virtual-camera` in CI.
 
 ## Not yet run anywhere (highest risk first)
 
 | # | Risk | Why it might fail | First check |
 |---|---|---|---|
-| W-2 | Frame Server loads the media source and Windows Camera shows the placeholder | COM registration, activator attributes, sensor-profile filter string, or required stream attributes may differ from what Frame Server expects | TESTING M1 with CamTurn not running |
-| W-3 | Media source in Frame Server (LocalService) can open the user's pipe | Pipe DACL grants LocalService. If Frame Server activates the source inside an AppContainer client process, the ACL won't admit it and the camera shows only the placeholder | TESTING M1 with CamTurn running; `--pipe-probe` works but the Camera app shows the placeholder → this issue |
+| W-3b | Packaged (AppContainer) clients such as the Windows Camera app | Verified with a desktop MediaCapture client only. If Frame Server activates the source inside an AppContainer client, the pipe ACL won't admit it and only the placeholder shows | TESTING M1 |
 | W-4b | Registration on Windows 11 client SKUs (verified only on Server 2025 so far) | Different SKU; the privacy setting must allow camera access | Installer on the laptop; `--diagnose` "visible to apps" |
 | W-5 | MediaCapture with an exclusive NV12 frame reader on the Realtek webcam | Format negotiation, MJPG decode path, busy/privacy HRESULT mapping | TESTING L6, L7; `--list-cameras` |
 | W-6 | Teams and other apps: the remote side gets the picture | One reference virtual camera sample reports Teams showing a local preview but not sending to the far end | TESTING R2 |
