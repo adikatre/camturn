@@ -66,8 +66,10 @@ public class DeviceModelTests
     [Fact]
     public void ProfilesLoadAndExposeSensors()
     {
+        // Probe of the real laptop (2026-11-01): one accelerometer, in the lid; no hinge sensor.
         var device = new SimDevice(TestPaths.Inspiron);
-        Assert.Equal(2, device.SensorEnumerator.FindAll(SensorKind.Accelerometer).Count);
+        Assert.Single(device.SensorEnumerator.FindAll(SensorKind.Accelerometer));
+        Assert.Empty(device.SensorEnumerator.FindAll(SensorKind.HingeAngle));
         Assert.Equal(SensorLocation.Lid, device.DefaultAccelerometer!.Descriptor.Location);
         Assert.Equal(OrientationSourceKind.LidAccelerometer, ScenarioRunner.ChooseSource(device));
 

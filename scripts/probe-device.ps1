@@ -119,7 +119,7 @@ public static class CamTurnProbeNative {
 
 # ---- System ---------------------------------------------------------------------------------------
 Out-Line '=== CamTurn device probe (read-only) ==='
-Out-Line ("Probe version 1; run at {0:yyyy-MM-dd HH:mm} local time" -f (Get-Date))
+Out-Line ("Probe version 2; run at {0:yyyy-MM-dd HH:mm} local time" -f (Get-Date))
 $cs = Get-CimInstance Win32_ComputerSystem
 $os = Get-CimInstance Win32_OperatingSystem
 $enc = Get-CimInstance Win32_SystemEnclosure | Select-Object -First 1
@@ -280,7 +280,11 @@ try {
         $settings.StreamingCaptureMode = [Windows.Media.Capture.StreamingCaptureMode]::Video
         try {
             Await-Action ($mc.InitializeAsync($settings))
-            foreach ($fs in $mc.FrameSources.Values) {
+            # FrameSources is a WinRT map; enumerate key/value pairs (.Values is not projected in PowerShell 5.1).
+            $sources = @()
+            foreach ($kv in $mc.FrameSources) { $sources += $kv.Value }
+            if ($sources.Count -eq 0) { Out-Line '    (camera opened but reported no frame sources)' }
+            foreach ($fs in $sources) {
                 Out-Line "    formats for $($fs.Info.SourceKind)/$($fs.Info.MediaStreamType):"
                 $seen = @{}
                 foreach ($f in $fs.SupportedFormats) {
