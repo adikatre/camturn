@@ -52,6 +52,15 @@ Copy-Item (Join-Path $nativeBuild 'Release/camturn_mediasource.dll') $publish
 Copy-Item (Join-Path $nativeBuild 'Release/camturn_native.dll') $publish
 Copy-Item (Join-Path $root 'LICENSE'), (Join-Path $root 'THIRD_PARTY_NOTICES.md') $publish
 
+Step 'Smoke: the published CamTurn.exe starts (catches manifest/side-by-side errors)'
+$out = Join-Path $artifacts 'diagnose.txt'
+$p = Start-Process (Join-Path $publish 'CamTurn.exe') -ArgumentList '--diagnose' -Wait -PassThru -NoNewWindow -RedirectStandardOutput $out
+if ($p.ExitCode -ne 0 -or -not (Select-String -Path $out -Pattern 'CamTurn diagnostics' -Quiet)) {
+    Get-Content $out -ErrorAction SilentlyContinue
+    throw "CamTurn.exe --diagnose failed (exit code $($p.ExitCode))"
+}
+Get-Content $out | Select-Object -First 12
+
 if ($SkipInstaller) { return }
 
 Step 'Installer (Inno Setup 6)'

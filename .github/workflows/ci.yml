@@ -24,6 +24,8 @@ jobs:
           global-json-file: global.json
       - name: No third-party streaming software references (acceptance criterion 7)
         run: scripts/check-no-streaming-deps.sh
+      - name: XML files are well-formed (a bad app.manifest stops CamTurn.exe from starting)
+        run: python3 scripts/check-xml.py
       - name: Format (.NET)
         run: dotnet format CamTurn.sln --verify-no-changes
       - name: Format (C++)
