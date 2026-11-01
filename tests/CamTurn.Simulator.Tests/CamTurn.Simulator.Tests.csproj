@@ -11,6 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\CamTurn.Simulator\CamTurn.Simulator.csproj" />
+    <ProjectReference Include="..\..\src\CamTurn.Testing\CamTurn.Testing.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
