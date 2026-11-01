@@ -1,0 +1,70 @@
+<Window x:Class="CamTurn.App.Views.FirstRunWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Set up CamTurn"
+        Icon="/camturn.ico"
+        Width="760" Height="620" MinWidth="620" MinHeight="520"
+        WindowStartupLocation="CenterScreen">
+  <DockPanel Margin="24">
+    <TextBlock x:Name="StepTitle" DockPanel.Dock="Top" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,4" />
+    <TextBlock x:Name="StepCounter" DockPanel.Dock="Top" Style="{StaticResource Hint}" Margin="0,0,0,16" />
+
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+      <Button x:Name="BackButton" Content="_Back" Padding="16,6" Click="OnBack" />
+      <Button x:Name="NextButton" Content="_Next" Padding="16,6" Margin="8,0,0,0" IsDefault="True" Click="OnNext" />
+    </StackPanel>
+
+    <Grid>
+      <!-- 1. Welcome / Windows check -->
+      <StackPanel x:Name="Step1">
+        <TextBlock TextWrapping="Wrap" Text="CamTurn keeps your webcam picture upright when you fold your 2-in-1 into tent, stand or tablet mode. It runs quietly in the notification area and gives your apps a camera called &quot;CamTurn Camera&quot;." />
+        <TextBlock x:Name="WindowsCheck" Margin="0,16,0,0" TextWrapping="Wrap" FontWeight="SemiBold" />
+        <TextBlock Style="{StaticResource Hint}" Margin="0,16,0,0" Text="Everything stays on this PC: no account, no network access, no telemetry, and video is never recorded." />
+      </StackPanel>
+
+      <!-- 2. Virtual camera -->
+      <StackPanel x:Name="Step2" Visibility="Collapsed">
+        <TextBlock TextWrapping="Wrap" Text="Apps see CamTurn as a separate camera. The installer normally creates it for you." />
+        <TextBlock Margin="0,16,0,0" FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding VirtualCameraText}" />
+        <Button Content="Create &quot;CamTurn Camera&quot; (asks for administrator permission)" Command="{Binding RepairCommand}"
+                HorizontalAlignment="Left" Padding="12,6" Margin="0,12,0,0" />
+      </StackPanel>
+
+      <!-- 3. Physical camera -->
+      <StackPanel x:Name="Step3" Visibility="Collapsed">
+        <Label Content="Which camera should CamTurn use?" Target="{Binding ElementName=CameraChoice}" Padding="0,0,0,6" />
+        <ComboBox x:Name="CameraChoice" ItemsSource="{Binding Cameras}" SelectedItem="{Binding SelectedCamera}" />
+        <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,0" Text="Usually the built-in front camera. You can change this later in settings." />
+      </StackPanel>
+
+      <!-- 4. Rotation test -->
+      <DockPanel x:Name="Step4" Visibility="Collapsed">
+        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap"
+                   Text="Hold the laptop normally with the screen upright. Your face should look upright in the preview. Then fold into tablet mode and turn it on its side: the picture should stay upright." />
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,10,0,0">
+          <Button Content="It turns the wrong way: _flip direction" Command="{Binding FlipDirectionCommand}" Padding="12,6" />
+          <TextBlock VerticalAlignment="Center" Margin="12,0,0,0" Text="{Binding OrientationBadge, StringFormat=Detected: {0}}" />
+        </StackPanel>
+        <Border Background="Black" CornerRadius="6" Margin="0,12,0,0">
+          <Grid>
+            <Image x:Name="Preview" Stretch="Uniform" AutomationProperties.Name="Rotation test preview" />
+            <TextBlock x:Name="PreviewPlaceholder" Foreground="White" Text="Starting the camera…" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+      </DockPanel>
+
+      <!-- 5. Done -->
+      <StackPanel x:Name="Step5" Visibility="Collapsed">
+        <TextBlock TextWrapping="Wrap" Text="In your video app, choose &quot;CamTurn Camera&quot; as the camera. Windows may show it as &quot;CamTurn Camera Windows Virtual Camera&quot;." />
+        <TextBlock Margin="0,12,0,0" TextWrapping="Wrap" Text="• Zoom: Settings > Video > Camera" />
+        <TextBlock TextWrapping="Wrap" Text="• Microsoft Teams: Settings > Devices > Camera" />
+        <TextBlock TextWrapping="Wrap" Text="• Discord: User Settings > Voice &amp; Video > Camera" />
+        <TextBlock TextWrapping="Wrap" Text="• Google Meet and other sites in Chrome or Edge: the camera menu in the call, or the site's camera permission" />
+        <TextBlock TextWrapping="Wrap" Text="• Windows Camera app: the switch-camera button" />
+        <TextBlock Style="{StaticResource Hint}" Margin="0,12,0,0" TextWrapping="Wrap"
+                   Text="Your real camera turns on only while an app is using CamTurn Camera, and turns off a few seconds after it stops." />
+        <CheckBox Content="Start CamTurn when I sign in to Windows" Margin="0,16,0,0" IsChecked="{Binding StartWithWindows}" />
+      </StackPanel>
+    </Grid>
+  </DockPanel>
+</Window>

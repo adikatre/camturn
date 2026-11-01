@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CamTurn.Core.Video;
 
 namespace CamTurn.Simulator;
 

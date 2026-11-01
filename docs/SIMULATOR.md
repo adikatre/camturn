@@ -13,9 +13,9 @@ the frames it receives.
 | Part | Model | Code |
 |---|---|---|
 | Physical pose | Lid roll (clockwise as seen by the viewer), lid tilt, hinge angle 0–360°, optional hand shake; smooth transitions | `DevicePose`, `SimDevice` |
-| Lid accelerometer | Gravity in the panel's native frame (Windows convention), Gaussian noise, 16 ms report interval, optional axis-mismatch faults (`mirrorX`, `axisRotationDegrees`) | `SimAccelerometer` |
-| Base accelerometer | Same, in the keyboard frame | `SimAccelerometer` |
-| Hinge angle sensor | Hinge angle ± 0.5° noise | `SimHingeAngleSensor` |
+| Lid accelerometer | Gravity in the panel's native frame (Windows convention), Gaussian noise, 16 ms report interval, optional axis-mismatch faults (`mirrorX`, `axisRotationDegrees`). The real Inspiron exposes exactly one accelerometer, in the lid (probe 2026-11-01). | `SimAccelerometer` |
+| Base accelerometer | Same, in the keyboard frame. Not present on the real Inspiron; used by the `-base-only` profile. | `SimAccelerometer` |
+| Hinge angle sensor | Hinge angle ± 0.5° noise. Not exposed on the real Inspiron. | `SimHingeAngleSensor` |
 | SimpleOrientationSensor | Quadrant with hysteresis + Faceup/Facedown (diagnostic cross-check only) | `SimSimpleOrientationSensor` |
 | Windows shell | Laptop/slate posture from hinge angle; desktop auto-rotate only in slate; rotation lock | `SimPosture`, `SimDisplay` |
 | Lid webcam | Lid-fixed camera: when the device rolls, the scene appears rotated by the same amount. Advertised formats, NV12 output, busy/disconnect faults, "LED on" state | `SimLidCamera`, `SceneRenderer` |
@@ -55,7 +55,7 @@ Device profiles live in `sim/devices/`, scenarios in `sim/scenarios/`.
 ```bash
 scripts/bootstrap-dotnet.sh          # once per fresh container
 dotnet build
-alias camturn-sim='dotnet src/CamTurn.Sim.Cli/bin/Debug/net8.0/camturn-sim.dll'
+alias camturn-sim='dotnet src/CamTurn.Sim.Cli/bin/Debug/net10.0/camturn-sim.dll'
 
 camturn-sim --diagnose --pose tent             # what CamTurn's --diagnose would report
 camturn-sim --sensor-dump --pose tablet-portrait-right --duration 2

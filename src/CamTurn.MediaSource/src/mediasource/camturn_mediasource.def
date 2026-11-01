@@ -1,0 +1,4 @@
+LIBRARY camturn_mediasource
+EXPORTS
+    DllCanUnloadNow PRIVATE
+    DllGetClassObject PRIVATE

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using CamTurn.Core.Orientation;
 using CamTurn.Core.Sensors;
+using CamTurn.Core.Video;
 using CamTurn.Simulator;
 
 namespace CamTurn.Sim.Cli;
