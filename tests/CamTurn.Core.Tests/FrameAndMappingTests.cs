@@ -108,4 +108,13 @@ public class FrameAndMappingTests
         Assert.Equal(-Math.Sin(h), lid.Y, 9);
         Assert.Equal(Math.Cos(h), lid.Z, 9);
     }
+
+    [Fact]
+    public void PlaceholderIsGreyscaleTestPatternIsNot()
+    {
+        var grey = new VideoFrame(64, 36, PixelFormat.Nv12, new byte[FrameProtocol.Nv12Size(64, 36)], 64, 0, default);
+        Array.Fill(grey.Data, (byte)128, 64 * 36, 64 * 18);
+        Assert.True(UprightDetector.IsPlaceholder(grey));
+        Assert.False(UprightDetector.IsPlaceholder(FrameOps.BgraToNv12(TestPattern.Render(64, 36, 0, default))));
+    }
 }

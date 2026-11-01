@@ -30,6 +30,7 @@ public static class Cli
                 CliCommand.Unregister => Unregister(o),
                 CliCommand.PipeProbe => await PipeProbeAsync(),
                 CliCommand.SetAutostart => SetAutostart(o.AutostartOn),
+                CliCommand.ProbeVirtualCamera => await ProbeVirtualCameraAsync(),
                 _ => 2,
             };
         }
@@ -138,6 +139,64 @@ public static class Cli
         new VirtualCameraRegistrar().Unregister(allUsers: !o.CurrentUserOnly);
         Console.WriteLine("\"CamTurn Camera\" removed.");
         return 0;
+    }
+
+    /// <summary>
+    /// End-to-end check of the Windows side: opening "CamTurn Camera" makes Frame Server load the media source, which
+    /// connects to the running CamTurn app. With the app running --test-pattern, the picture must be the upright test
+    /// pattern; without the app, it must be the placeholder.
+    /// </summary>
+    private static async Task<int> ProbeVirtualCameraAsync()
+    {
+        var info = await MediaCaptureCamera.FindVirtualCameraAsync();
+        if (info is null)
+        {
+            Console.Error.WriteLine("\"CamTurn Camera\" is not listed. Run CamTurn.exe --register as administrator.");
+            return 1;
+        }
+
+        Console.WriteLine($"Opening {info.Name}...");
+        var camera = await MediaCaptureCamera.CreateAsync(info);
+        var frames = 0;
+        VideoFrame? last = null;
+        camera.FrameArrived += (_, f) =>
+        {
+            Interlocked.Increment(ref frames);
+            Volatile.Write(ref last, f);
+        };
+        camera.Start(new VideoFormat(1280, 720, 30, "NV12"));
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+        while (DateTime.UtcNow < deadline && Volatile.Read(ref frames) < 60 && camera.State is not (CameraState.Busy or CameraState.Disconnected))
+        {
+            await Task.Delay(100);
+        }
+
+        // Keep reading a little longer so the media source has time to connect to the app's pipe.
+        await Task.Delay(TimeSpan.FromSeconds(2));
+        camera.Stop();
+        var frame = Volatile.Read(ref last);
+        if (frame is null)
+        {
+            Console.Error.WriteLine($"No frames received (camera state {camera.State}; {camera.LastError ?? "no error reported"}).");
+            return 1;
+        }
+
+        Console.WriteLine($"Received {frames} frames, last {frame.Width}x{frame.Height}.");
+        if (UprightDetector.IsPlaceholder(frame))
+        {
+            Console.WriteLine("Picture: placeholder (media source works; CamTurn app not connected).");
+            return 3;
+        }
+
+        var up = UprightDetector.Detect(frame);
+        if (!up.Confident)
+        {
+            Console.WriteLine("Picture: live image (not the test pattern); orientation not checked.");
+            return 0;
+        }
+
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Picture: test pattern, rotated {up.RotationCwDegrees:0.0} deg, mirrored {up.Mirrored}."));
+        return Math.Abs(up.RotationCwDegrees) < 10 && !up.Mirrored ? 0 : 4;
     }
 
     private static int SetAutostart(bool on)
