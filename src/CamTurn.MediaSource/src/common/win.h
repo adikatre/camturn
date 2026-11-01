@@ -9,6 +9,15 @@
 #endif
 
 #include <windows.h>
+// Order matters: ks.h redefines GUID_NULL as a __uuidof() macro, so everything that pulls in cguid.h (COM and
+// WRL headers) must come before the kernel-streaming headers.
+#include <cguid.h>
+#include <objbase.h>
+#include <wrl/client.h>
+#include <wrl/implements.h>
+#include <wrl/module.h>
+#include <wrl/ftm.h>
+#include <wrl/wrappers/corewrappers.h>
 #include <initguid.h>
 #include <propvarutil.h>
 #include <mfapi.h>
@@ -18,10 +27,6 @@
 #include <ks.h>
 #include <ksproxy.h>
 #include <ksmedia.h>
-#include <wrl/client.h>
-#include <wrl/implements.h>
-#include <wrl/ftm.h>
-#include <wrl/wrappers/corewrappers.h>
 
 #define CT_RETURN_IF_FAILED(expr)                                                                                      \
     do                                                                                                                 \
