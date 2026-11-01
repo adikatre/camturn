@@ -15,7 +15,14 @@
 #include <objbase.h>
 #include <wrl/client.h>
 #include <wrl/implements.h>
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4324) // padding warning inside the SDK's own wrl/module.h
+#endif
 #include <wrl/module.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <wrl/ftm.h>
 #include <wrl/wrappers/corewrappers.h>
 #include <initguid.h>

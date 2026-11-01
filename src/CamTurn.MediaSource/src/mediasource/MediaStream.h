@@ -23,7 +23,7 @@ class MediaStream : public Microsoft::WRL::RuntimeClass<
     STDMETHODIMP EndGetEvent(IMFAsyncResult* result, IMFMediaEvent** event) override;
     STDMETHODIMP GetEvent(DWORD flags, IMFMediaEvent** event) override;
     STDMETHODIMP QueueEvent(MediaEventType type, REFGUID extendedType, HRESULT status,
-                            const PROPVARIANT* value) override;
+                            const PROPVARIANT* data) override;
 
     // IMFMediaStream
     STDMETHODIMP GetMediaSource(IMFMediaSource** source) override;

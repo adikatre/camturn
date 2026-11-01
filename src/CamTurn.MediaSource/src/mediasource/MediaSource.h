@@ -21,7 +21,7 @@ class MediaSource : public Microsoft::WRL::RuntimeClass<
     STDMETHODIMP EndGetEvent(IMFAsyncResult* result, IMFMediaEvent** event) override;
     STDMETHODIMP GetEvent(DWORD flags, IMFMediaEvent** event) override;
     STDMETHODIMP QueueEvent(MediaEventType type, REFGUID extendedType, HRESULT status,
-                            const PROPVARIANT* value) override;
+                            const PROPVARIANT* data) override;
 
     // IMFMediaSource
     STDMETHODIMP CreatePresentationDescriptor(IMFPresentationDescriptor** descriptor) override;
