@@ -43,15 +43,20 @@ public sealed class MediaCaptureCamera : ICameraSource, IDisposable
     public event EventHandler<CameraState>? StateChanged;
 
     /// <summary>Colour video cameras, front panel first. Excludes any camera named like CamTurn's virtual camera.</summary>
-    public static async Task<IReadOnlyList<CameraInfo>> FindAllAsync()
+    public static Task<IReadOnlyList<CameraInfo>> FindAllAsync() => FindAsync(camTurn: false);
+
+    /// <summary>CamTurn's own virtual camera, opened the way any app would (used by --probe-virtual-camera).</summary>
+    public static async Task<CameraInfo?> FindVirtualCameraAsync() => (await FindAsync(camTurn: true)).FirstOrDefault();
+
+    private static async Task<IReadOnlyList<CameraInfo>> FindAsync(bool camTurn)
     {
         var groups = await MediaFrameSourceGroup.FindAllAsync();
         var list = new List<CameraInfo>();
         foreach (var g in groups)
         {
-            if (g.DisplayName.Contains("CamTurn", StringComparison.OrdinalIgnoreCase))
+            if (g.DisplayName.Contains("CamTurn", StringComparison.OrdinalIgnoreCase) != camTurn)
             {
-                continue; // never capture our own output
+                continue; // never capture our own output (unless probing it)
             }
 
             var source = g.SourceInfos.FirstOrDefault(s => s.SourceKind == MediaFrameSourceKind.Color && s.MediaStreamType == MediaStreamType.VideoRecord)

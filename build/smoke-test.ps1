@@ -34,11 +34,20 @@ $diag = Invoke-CamTurn @('--diagnose')
 Check ($diag.ExitCode -eq 0) 'CamTurn.exe --diagnose runs'
 Check ($diag.Text -match 'visible to apps\s+True') '"CamTurn Camera" visible to apps (needs Frame Server; may fail on Server SKUs)'
 
+# Open "CamTurn Camera" like an app would while CamTurn is NOT running: Frame Server must load our media source,
+# which serves its placeholder.
+$probe0 = Invoke-CamTurn @('--probe-virtual-camera')
+Check ($probe0.ExitCode -eq 3) "Frame Server loads the media source and serves the placeholder (exit $($probe0.ExitCode); 3 expected)"
+
 # Start the app with the test pattern and probe the pipe like the media source would.
 $run = Start-Process "$app\CamTurn.exe" -ArgumentList '--test-pattern', '--simulate-orientation', '180', '--minimized' -PassThru
 Start-Sleep -Seconds 5
 $probe = Invoke-CamTurn @('--pipe-probe')
 Check ($probe.Text -match 'rotation 180 deg') 'pipe delivers test-pattern frames rotated 180'
+
+# Full path: app -> pipe -> media source in Frame Server -> a capture app. Acceptance criterion 1 without a human.
+$probe1 = Invoke-CamTurn @('--probe-virtual-camera')
+Check ($probe1.ExitCode -eq 0) "CamTurn Camera shows the upright test pattern end to end (exit $($probe1.ExitCode); 0 expected)"
 Stop-Process -Id $run.Id -Force -ErrorAction SilentlyContinue
 
 $u = Start-Process "$app\unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' -Wait -PassThru
