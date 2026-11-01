@@ -14,6 +14,7 @@ public enum CliCommand
     Register,
     Unregister,
     PipeProbe,
+    SetAutostart,
 }
 
 /// <summary>Command-line flags (handoff section 4). Commands print to the parent console and exit.</summary>
@@ -31,6 +32,7 @@ public sealed record CliOptions
           --register [--current-user] Create "CamTurn Camera" (all users needs administrator; the installer does this)
           --unregister [--current-user] Remove "CamTurn Camera"
           --pipe-probe                Connect to a running CamTurn like the virtual camera would and report frames
+          --set-autostart on|off      Start CamTurn when you sign in (per user; used by the installer)
           --help
 
         App options:
@@ -57,6 +59,8 @@ public sealed record CliOptions
 
     public double DurationSeconds { get; init; } = 10;
 
+    public bool AutostartOn { get; init; }
+
     public static CliOptions Parse(string[] args)
     {
         var o = new CliOptions();
@@ -72,6 +76,7 @@ public sealed record CliOptions
                 "--register" => o with { Command = CliCommand.Register },
                 "--unregister" => o with { Command = CliCommand.Unregister },
                 "--pipe-probe" => o with { Command = CliCommand.PipeProbe },
+                "--set-autostart" => o with { Command = CliCommand.SetAutostart, AutostartOn = Next().ToLowerInvariant() switch { "on" => true, "off" => false, _ => throw new ArgumentException("--set-autostart takes on or off.") } },
                 "--current-user" => o with { CurrentUserOnly = true },
                 "--minimized" => o with { Minimized = true },
                 "--test-pattern" => o with { TestPattern = true },
