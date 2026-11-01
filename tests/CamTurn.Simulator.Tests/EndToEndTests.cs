@@ -95,6 +95,7 @@ public class EndToEndTests(ITestOutputHelper output)
     }
 
     [Fact]
+    [Trait("Category", "Performance")] // timing assertion: CI runs it without coverage instrumentation
     public void CompositorCostAt1080pInput()
     {
         var src = FrameOps.BgraToNv12(TestPattern.Render(1920, 1080, 90, default));

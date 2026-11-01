@@ -14,7 +14,9 @@ namespace CamTurn.Simulator.Tests;
 /// </summary>
 public class EngineTests
 {
-    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
+    // Safety net only: every wait below returns as soon as its condition holds. Generous because CI runs these
+    // under coverage instrumentation with all test classes in parallel.
+    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(60);
 
     private static async Task WaitUntil(Func<bool> condition, string what)
     {
@@ -42,7 +44,7 @@ public class EngineTests
     {
         var pipe = TestPipes.UniqueName();
         using var accel = new FixedAccelerometer(simulatedRoll);
-        using var camera = new TestPatternCamera(() => simulatedRoll);
+        using var camera = new TestPatternCamera(() => simulatedRoll, formats: [new VideoFormat(640, 360, 30, "NV12")]);
         var engine = new CamTurnEngine(
             new EngineDependencies { Camera = camera, Accelerometer = accel, Host = new FramePipeHost(TestPipes.Acceptor(pipe)) },
             new AppConfig());
