@@ -4,7 +4,7 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- Never elevated at runtime; --register/--unregister are launched elevated only by the installer or the repair button. -->
+        <!-- Never elevated at runtime. Only the installer and the repair button start the register and unregister commands elevated. -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>

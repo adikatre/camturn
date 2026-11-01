@@ -52,10 +52,19 @@ public static class Program
 
     private static void AttachParentConsole()
     {
-        // WinExe has no console; reuse the one we were launched from, if any.
-        AttachConsole(-1);
+        // WinExe has no console; reuse the one we were launched from, if any. When output is redirected (scripts,
+        // the installer, CI) keep the inherited handle instead, so the text lands where the caller expects it.
+        if (GetStdHandle(StdOutputHandle) == IntPtr.Zero)
+        {
+            AttachConsole(-1);
+        }
     }
+
+    private const int StdOutputHandle = -11;
 
     [DllImport("kernel32.dll")]
     private static extern bool AttachConsole(int processId);
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GetStdHandle(int handle);
 }
