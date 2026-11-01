@@ -95,6 +95,14 @@ jobs:
         with:
           name: camturn-installer
           path: installer
+      - name: Allow desktop apps to use cameras (privacy switch is off by default on Windows Server)
+        shell: pwsh
+        run: |
+          foreach ($root in 'HKLM:', 'HKCU:') {
+            $k = "$root\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam"
+            New-Item -Force $k | Out-Null; Set-ItemProperty $k -Name Value -Value Allow
+            New-Item -Force "$k\NonPackaged" | Out-Null; Set-ItemProperty "$k\NonPackaged" -Name Value -Value Allow
+          }
       - name: Install, register, diagnose, uninstall
         shell: pwsh
         run: ./build/smoke-test.ps1 -Installer (Get-ChildItem installer -Filter *.exe | Select-Object -First 1).FullName
