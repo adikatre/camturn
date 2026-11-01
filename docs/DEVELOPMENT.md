@@ -9,7 +9,7 @@
 
 ## Prerequisites
 
-- .NET 8 SDK (8.0.400 or newer feature band; see `global.json`).
+- .NET 10 SDK (10.0.100 or newer feature band; see `global.json`).
 - Windows-only stages will additionally need Visual Studio 2022 with the C++ desktop and .NET desktop
   workloads and the Windows 11 SDK (documented when those stages land).
 

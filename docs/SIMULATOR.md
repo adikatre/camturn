@@ -55,7 +55,7 @@ Device profiles live in `sim/devices/`, scenarios in `sim/scenarios/`.
 ```bash
 scripts/bootstrap-dotnet.sh          # once per fresh container
 dotnet build
-alias camturn-sim='dotnet src/CamTurn.Sim.Cli/bin/Debug/net8.0/camturn-sim.dll'
+alias camturn-sim='dotnet src/CamTurn.Sim.Cli/bin/Debug/net10.0/camturn-sim.dll'
 
 camturn-sim --diagnose --pose tent             # what CamTurn's --diagnose would report
 camturn-sim --sensor-dump --pose tablet-portrait-right --duration 2
