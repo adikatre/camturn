@@ -3,7 +3,7 @@
 # mention is the README FAQ line explaining that CamTurn does not need it.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-hits=$(git grep -n -I -i -w -E 'obs|obs-studio|obs virtual' -- . ':!scripts/check-no-obs.sh' || true)
+hits=$(git grep -n -I -i -w -E 'obs|obs-studio|obs virtual' -- . ':!scripts/check-no-streaming-deps.sh' || true)
 allowed=$(printf '%s\n' "$hits" | grep -c '^README.md:.*does not need' || true)
 other=$(printf '%s\n' "$hits" | grep -v '^README.md:.*does not need' | grep -v '^$' || true)
 if [ -n "$other" ]; then
@@ -15,4 +15,4 @@ if [ "$allowed" -gt 1 ]; then
   echo "More than one README FAQ mention of OBS"
   exit 1
 fi
-echo "OK: no OBS references outside the single README FAQ line."
+echo "OK: no streaming-software references outside the single README FAQ line."

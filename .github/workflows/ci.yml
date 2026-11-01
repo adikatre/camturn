@@ -22,8 +22,8 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: No OBS references
-        run: scripts/check-no-obs.sh
+      - name: No third-party streaming software references (acceptance criterion 7)
+        run: scripts/check-no-streaming-deps.sh
       - name: Format (.NET)
         run: dotnet format CamTurn.sln --verify-no-changes
       - name: Format (C++)

@@ -26,6 +26,22 @@ Everything here was **not** verified on real hardware. Each item says how to che
 | K-8 | Windows only auto-rotates in slate posture (the simulator approximates slate as hinge > 190°; the real device reports it via ConvertibleSlateMode). | Fold slowly from laptop to tent with rotation lock off |
 | K-9 | Accelerometer noise ~0.02 g/axis (minimum interval measured: 10 ms). | `camturn --sensor-dump` with the laptop still on a desk |
 
+## Not yet run anywhere (highest risk first)
+
+| # | Risk | Why it might fail | First check |
+|---|---|---|---|
+| W-1 | MSVC build of `camturn_mediasource.dll` / `camturn_native.dll` | Written without a Windows compiler. Header or WRL details (e.g. `IKsControl` declarations, `ChainInterfaces`) may need small fixes | CI `windows` job |
+| W-2 | Frame Server loads the media source and Windows Camera shows the placeholder | COM registration, activator attributes, sensor-profile filter string, or required stream attributes may differ from what Frame Server expects | TESTING M1 with CamTurn not running |
+| W-3 | Media source in Frame Server (LocalService) can open the user's pipe | Pipe DACL grants LocalService. If Frame Server activates the source inside an AppContainer client process, the ACL won't admit it and the camera shows only the placeholder | TESTING M1 with CamTurn running; `--pipe-probe` works but the Camera app shows the placeholder → this issue |
+| W-4 | `MFCreateVirtualCamera(System, AllUsers)` from the installer | Needs admin (we have it) and the privacy setting to allow camera access. Windows appends "Windows Virtual Camera" to the name | Installer log; `--diagnose` "visible to apps" |
+| W-5 | MediaCapture with an exclusive NV12 frame reader on the Realtek webcam | Format negotiation, MJPG decode path, busy/privacy HRESULT mapping | TESTING L6, L7; `--list-cameras` |
+| W-6 | Teams and other apps: the remote side gets the picture | One reference virtual camera sample reports Teams showing a local preview but not sending to the far end | TESTING R2 |
+| W-7 | Some apps cache camera lists or don't list virtual cameras | App-specific | TESTING R1–R6 |
+| W-8 | Frame Server restart during a call | The media source is recreated, and the pipe client reconnects on Start; the host app's behaviour is unknown | TESTING M4 |
+| W-9 | WPF UI layout and Fluent theme in light/dark, keyboard navigation | Never rendered | Open settings in both themes; Tab through all controls |
+| W-10 | Installer upgrade while Frame Server holds the DLL | `restartreplace` should defer the replacement to reboot | Install a newer build over an older one during a call |
+| K-10 | `dmDisplayOrientation` (DMDO_90/180/270) mapped to 90/180/270 clockwise for "follow display rotation" | Direction unverified | Advanced mode with the desktop rotated each way |
+
 ## Simulator limitations
 
 - Windows' SimpleOrientation and auto-rotate thresholds are approximations (±60° band, Faceup below 35%

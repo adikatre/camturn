@@ -141,10 +141,11 @@ public sealed class CamTurnEngine : IAsyncDisposable, IPipelineEffects
 
         if (_deps.Accelerometer is { } accel)
         {
-            accel.ReadingChanged += (_, r) => Locked(() => _tracker.Update(r with { Timestamp = Now }));
+            // Readings carry the sensor's own monotonic timestamps; the tracker's hold time is measured on that clock.
+            accel.ReadingChanged += (_, r) => Locked(() => _tracker.Update(r));
             if (accel.GetCurrentReading() is { } first)
             {
-                Locked(() => _tracker.Update(first with { Timestamp = Now }));
+                Locked(() => _tracker.Update(first));
             }
         }
 
