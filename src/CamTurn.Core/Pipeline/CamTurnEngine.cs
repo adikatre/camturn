@@ -33,6 +33,10 @@ public sealed record EngineStatus
 
     public bool PreviewActive { get; init; }
 
+    public bool Paused { get; init; }
+
+    public RunMode RunMode { get; init; }
+
     public string? LastError { get; init; }
 }
 
@@ -88,7 +92,7 @@ public sealed class CamTurnEngine : IAsyncDisposable, IPipelineEffects
 
     public event EventHandler<EngineStatus>? StatusChanged;
 
-    /// <summary>Composed output frames (NV12, config canvas size) at ~15 fps while a preview is active.</summary>
+    /// <summary>Composed output frames (NV12, half the output size) at ~15 fps while a preview is active.</summary>
     public event EventHandler<VideoFrame>? PreviewFrame;
 
     public EngineStatus Status
@@ -160,6 +164,9 @@ public sealed class CamTurnEngine : IAsyncDisposable, IPipelineEffects
 
     /// <summary>Manual mode start/stop from the tray.</summary>
     public void SetManual(bool on) => Locked(() => _controller.SetManual(on, Now));
+
+    /// <summary>Tray Start/Stop: pause keeps the camera closed in every run mode.</summary>
+    public void SetPaused(bool paused) => Locked(() => _controller.SetPaused(paused, Now));
 
     public void SetSessionLocked(bool locked) => Locked(() => _controller.SetSessionLocked(locked, Now));
 
@@ -264,8 +271,9 @@ public sealed class CamTurnEngine : IAsyncDisposable, IPipelineEffects
 
         if (preview)
         {
-            var buf = _previewCompositor.Compose(frame, new CompositorSettings(decision.CorrectionCw, cfg.Mirror, cfg.PortraitFit, cfg.OutputWidth, cfg.OutputHeight));
-            PreviewFrame?.Invoke(this, new VideoFrame(cfg.OutputWidth, cfg.OutputHeight, PixelFormat.Nv12, buf, cfg.OutputWidth, (long)counter, frame.Timestamp));
+            int pw = (cfg.OutputWidth / 2) & ~1, ph = (cfg.OutputHeight / 2) & ~1;
+            var buf = _previewCompositor.Compose(frame, new CompositorSettings(decision.CorrectionCw, cfg.Mirror, cfg.PortraitFit, pw, ph));
+            PreviewFrame?.Invoke(this, new VideoFrame(pw, ph, PixelFormat.Nv12, buf, pw, (long)counter, frame.Timestamp));
         }
 
         Locked(() => { });
@@ -309,6 +317,8 @@ public sealed class CamTurnEngine : IAsyncDisposable, IPipelineEffects
             RotationSource = decision.Source,
             AutoAvailable = _deps.Accelerometer is not null,
             PreviewActive = _previewActive,
+            Paused = _controller.Paused,
+            RunMode = _controller.Mode,
             LastError = _lastError,
         };
     }

@@ -69,14 +69,27 @@ public static class FrameOps
 
     public static VideoFrame Nv12ToBgra(VideoFrame src)
     {
+        var dst = VideoFrame.CreateBgra(src.Width, src.Height, src.FrameNumber, src.Timestamp);
+        Nv12ToBgra(src, dst.Data);
+        return dst;
+    }
+
+    /// <summary>NV12 to BGRA into a caller-owned buffer of width*height*4 bytes (no allocation; used by the preview).</summary>
+    public static void Nv12ToBgra(VideoFrame src, byte[] bgra)
+    {
         if (src.Format != PixelFormat.Nv12)
         {
             throw new ArgumentException("Expected NV12.", nameof(src));
         }
 
         int w = src.Width, h = src.Height;
-        var dst = VideoFrame.CreateBgra(w, h, src.FrameNumber, src.Timestamp);
+        if (bgra.Length < w * h * 4)
+        {
+            throw new ArgumentException("Destination too small.", nameof(bgra));
+        }
+
         var uvBase = src.Stride * h;
+        var dstStride = w * 4;
         for (var y = 0; y < h; y++)
         {
             for (var x = 0; x < w; x++)
@@ -84,15 +97,13 @@ public static class FrameOps
                 var c = src.Data[(y * src.Stride) + x] - 16;
                 var uv = uvBase + ((y / 2) * src.Stride) + (x & ~1);
                 int d = src.Data[uv] - 128, e = src.Data[uv + 1] - 128;
-                var o = (y * dst.Stride) + (x * 4);
-                dst.Data[o] = ClampByte(((298 * c) + (516 * d) + 128) >> 8);
-                dst.Data[o + 1] = ClampByte(((298 * c) - (100 * d) - (208 * e) + 128) >> 8);
-                dst.Data[o + 2] = ClampByte(((298 * c) + (409 * e) + 128) >> 8);
-                dst.Data[o + 3] = 255;
+                var o = (y * dstStride) + (x * 4);
+                bgra[o] = ClampByte(((298 * c) + (516 * d) + 128) >> 8);
+                bgra[o + 1] = ClampByte(((298 * c) - (100 * d) - (208 * e) + 128) >> 8);
+                bgra[o + 2] = ClampByte(((298 * c) + (409 * e) + 128) >> 8);
+                bgra[o + 3] = 255;
             }
         }
-
-        return dst;
     }
 
     private static Span<uint> MemoryMarshalUInts(byte[] data) =>

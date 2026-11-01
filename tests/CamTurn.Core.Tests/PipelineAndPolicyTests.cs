@@ -147,6 +147,21 @@ public class PipelineControllerTests
     }
 
     [Fact]
+    public void PauseOverridesEveryMode()
+    {
+        var fx = new Effects();
+        var p = new PipelineController(fx, RunMode.AlwaysOn);
+        p.Tick(S(0));
+        p.SetPaused(true, S(1));
+        Assert.False(fx.Open);
+        Assert.Equal(PipelineStatus.Paused, p.Status);
+        p.ConsumerConnected(S(2));
+        Assert.False(fx.Open);
+        p.SetPaused(false, S(3));
+        Assert.True(fx.Open);
+    }
+
+    [Fact]
     public void SwitchingModesTakesEffectImmediately()
     {
         var fx = new Effects();

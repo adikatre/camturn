@@ -52,7 +52,7 @@ public class EngineTests
             accel.Start();
             Assert.Equal(CameraState.Closed, camera.State); // nobody watching: camera closed
 
-            await using var consumer = new PipeConsumerClient(pipe);
+            await using var consumer = new FramePipeClient(pipe);
             await consumer.ConnectAsync(640, 360, 30, Timeout);
             var frame = await consumer.WaitForFrameAsync(h => h.Param == RotationMapping.Default.CorrectionFor((Quadrant)simulatedRoll), Timeout);
 
@@ -74,7 +74,7 @@ public class EngineTests
         await using (engine)
         {
             engine.Start();
-            var consumer = new PipeConsumerClient(pipe);
+            var consumer = new FramePipeClient(pipe);
             await consumer.ConnectAsync(320, 180, 30, Timeout);
             await WaitUntil(() => camera.State == CameraState.Streaming, "camera opened for consumer");
             Assert.False(engine.Status.AutoAvailable);
@@ -97,7 +97,7 @@ public class EngineTests
         await using (engine)
         {
             engine.Start();
-            await using var consumer = new PipeConsumerClient(pipe);
+            await using var consumer = new FramePipeClient(pipe);
             await consumer.ConnectAsync(320, 180, 30, Timeout);
             await WaitUntil(() => engine.Status.Pipeline == PipelineStatus.CameraBusy, "busy reported");
             Assert.Contains("in use", engine.Status.LastError, StringComparison.Ordinal);
@@ -119,7 +119,7 @@ public class EngineTests
         await using (engine)
         {
             engine.Start();
-            await using var consumer = new PipeConsumerClient(pipe);
+            await using var consumer = new FramePipeClient(pipe);
             await consumer.ConnectAsync(320, 180, 30, Timeout);
             await WaitUntil(() => device.Camera.LedOn, "lid camera opened");
 
