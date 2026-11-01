@@ -6,8 +6,9 @@ then show you sideways or upside down. CamTurn runs in the notification area, re
 rotates the camera picture to match, and offers it to every app as a camera called **CamTurn Camera**. It works
 offline, needs no account, and turns your real camera on only while an app is using it.
 
-> **Status: pre-release (0.1.0).** Every part is built, but it has not yet been run end to end on real hardware.
-> See [What has been tested](#what-has-been-tested) and [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
+> **Status: pre-release (0.1.0).** The virtual camera works end to end on Windows CI. It has not yet been tested with
+> a real webcam, accelerometer or video-call apps. See [What has been tested](#what-has-been-tested) and
+> [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
 
 <!-- Screenshots / demo GIF go here once captured on hardware:
 ![Settings window](docs/images/settings.png)
@@ -150,10 +151,13 @@ using the media source, its DLL is deleted at the next restart.
   orientation hysteresis, compositor, camera on/off logic, settings, and the frame protocol. Tests also run the
   whole app pipeline over a real named pipe, driven by a simulator of the Inspiron 16 7640 2-in-1 (`camturn-sim`,
   [docs/SIMULATOR.md](docs/SIMULATOR.md)). The C++ protocol and placeholder code are tested too.
-- **Windows CI (set up; first run pending until the repository is on GitHub):** builds the C++ media source with
-  MSVC and the WPF app, runs the Windows integration tests, and builds the installer. An experimental job installs
-  and uninstalls on Windows Server 2025.
-- **Not yet done:** running on the developer's laptop with real apps. See [docs/TESTING.md](docs/TESTING.md).
+- **Windows CI, on every change:** builds the C++ media source with MSVC and the WPF app, runs the tests, launches
+  `CamTurn.exe`, and builds the installer. Then, on Windows Server 2025, it installs CamTurn, opens "CamTurn Camera"
+  the way an app would, and checks that Windows' camera service loads CamTurn's media source. The placeholder
+  shows without the app, and the **upright test pattern** shows with `--test-pattern --simulate-orientation 180`.
+  It then uninstalls and checks for leftovers.
+- **Not yet done:** the real webcam and accelerometer, the settings UI, and Zoom, Teams, Meet and Discord on the
+  developer's laptop. See [docs/TESTING.md](docs/TESTING.md).
 
 ## Contributing
 
