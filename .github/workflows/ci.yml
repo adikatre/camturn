@@ -35,9 +35,13 @@ jobs:
       - name: Build (all projects, Windows ones via EnableWindowsTargeting)
         run: dotnet build CamTurn.sln -c Release
       - name: Test with coverage
+        timeout-minutes: 15
         run: |
-          dotnet test tests/CamTurn.Core.Tests -c Release --no-build --collect:"XPlat Code Coverage" --results-directory artifacts/test-results
-          dotnet test tests/CamTurn.Simulator.Tests -c Release --no-build --collect:"XPlat Code Coverage" --results-directory artifacts/test-results
+          dotnet test tests/CamTurn.Core.Tests -c Release --no-build --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory artifacts/test-results --blame-hang-timeout 5m
+          dotnet test tests/CamTurn.Simulator.Tests -c Release --no-build --filter "Category!=Performance" --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory artifacts/test-results --blame-hang-timeout 5m
+      - name: Performance tests (no instrumentation)
+        timeout-minutes: 5
+        run: dotnet test tests/CamTurn.Simulator.Tests -c Release --no-build --filter "Category=Performance" --logger "console;verbosity=detailed"
       - name: Simulator scenarios
         run: dotnet run --project src/CamTurn.Sim.Cli -c Release --no-build -- --run-all
       - name: Portable C++ tests
@@ -63,6 +67,7 @@ jobs:
         run: |
           if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup --no-progress -y }
       - name: Build, test, publish, installer
+        timeout-minutes: 45
         shell: pwsh
         run: ./build/build-windows.ps1 -Version 0.1.0-ci.${{ github.run_number }}
       - uses: actions/upload-artifact@v4

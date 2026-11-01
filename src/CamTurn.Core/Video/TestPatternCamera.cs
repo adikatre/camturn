@@ -14,8 +14,9 @@ public sealed class TestPatternCamera : ICameraSource, IDisposable
     private VideoFormat _format;
     private long _frameNumber;
     private long _startTicks;
+    private int _rendering;
 
-    public TestPatternCamera(Func<double>? rollProvider = null, TimeProvider? time = null)
+    public TestPatternCamera(Func<double>? rollProvider = null, TimeProvider? time = null, IReadOnlyList<VideoFormat>? formats = null)
     {
         _rollProvider = rollProvider ?? (() => 0);
         _time = time ?? TimeProvider.System;
@@ -23,7 +24,7 @@ public sealed class TestPatternCamera : ICameraSource, IDisposable
             "camturn:test-pattern",
             "CamTurn test pattern",
             "Front",
-            [new(1280, 720, 30, "NV12"), new(1920, 1080, 30, "NV12"), new(640, 360, 30, "NV12")]);
+            formats ?? [new(1280, 720, 30, "NV12"), new(1920, 1080, 30, "NV12"), new(640, 360, 30, "NV12")]);
     }
 
     public CameraDescriptor Descriptor { get; }
@@ -73,18 +74,32 @@ public sealed class TestPatternCamera : ICameraSource, IDisposable
 
     private void Tick()
     {
-        VideoFormat f;
-        lock (_gate)
+        // Drop the tick if the previous frame is still rendering; otherwise slow machines pile up timer callbacks
+        // and starve the thread pool.
+        if (Interlocked.Exchange(ref _rendering, 1) == 1)
         {
-            if (_timer is null)
-            {
-                return;
-            }
-
-            f = _format;
+            return;
         }
 
-        FrameArrived?.Invoke(this, Render(f.Width, f.Height));
+        try
+        {
+            VideoFormat f;
+            lock (_gate)
+            {
+                if (_timer is null)
+                {
+                    return;
+                }
+
+                f = _format;
+            }
+
+            FrameArrived?.Invoke(this, Render(f.Width, f.Height));
+        }
+        finally
+        {
+            Volatile.Write(ref _rendering, 0);
+        }
     }
 
     private void SetState(CameraState s)

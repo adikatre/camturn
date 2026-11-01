@@ -41,7 +41,9 @@ if (-not $SkipTests) {
 Step '.NET: build and test'
 dotnet build (Join-Path $root 'CamTurn.sln') -c Release -p:Version=$Version; Check
 if (-not $SkipTests) {
-    dotnet test (Join-Path $root 'CamTurn.sln') -c Release --no-build --collect:"XPlat Code Coverage" --results-directory (Join-Path $artifacts 'test-results'); Check
+    # Coverage instrumentation distorts timing, so performance tests run separately without it.
+    dotnet test (Join-Path $root 'CamTurn.sln') -c Release --no-build --filter 'Category!=Performance' --collect:"XPlat Code Coverage" --settings (Join-Path $root 'coverlet.runsettings') --results-directory (Join-Path $artifacts 'test-results') --blame-hang-timeout 5m; Check
+    dotnet test (Join-Path $root 'tests/CamTurn.Simulator.Tests') -c Release --no-build --filter 'Category=Performance'; Check
 }
 
 Step '.NET: publish app (self-contained, win-x64)'
