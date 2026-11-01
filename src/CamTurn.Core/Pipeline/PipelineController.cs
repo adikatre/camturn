@@ -67,6 +67,7 @@ public sealed class PipelineController
     private bool _manualOn;
     private bool _locked;
     private bool _suspended;
+    private bool _paused;
     private bool _cameraRequested;
     private CameraState _cameraState = CameraState.Closed;
 
@@ -126,6 +127,15 @@ public sealed class PipelineController
         Evaluate(now);
     }
 
+    /// <summary>Tray "Stop": keep the camera closed in every run mode until resumed.</summary>
+    public void SetPaused(bool paused, TimeSpan now)
+    {
+        _paused = paused;
+        Evaluate(now);
+    }
+
+    public bool Paused => _paused;
+
     public void CameraStateChanged(CameraState state, TimeSpan now)
     {
         _cameraState = state;
@@ -151,7 +161,7 @@ public sealed class PipelineController
 
     public bool WantsCamera(TimeSpan now)
     {
-        if (_suspended || (_locked && _options.ReleaseOnLock))
+        if (_paused || _suspended || (_locked && _options.ReleaseOnLock))
         {
             return false;
         }
@@ -191,7 +201,7 @@ public sealed class PipelineController
     {
         if (!want)
         {
-            return _suspended || (_locked && _options.ReleaseOnLock) ? PipelineStatus.Paused : PipelineStatus.Idle;
+            return _paused || _suspended || (_locked && _options.ReleaseOnLock) ? PipelineStatus.Paused : PipelineStatus.Idle;
         }
 
         return _cameraState switch

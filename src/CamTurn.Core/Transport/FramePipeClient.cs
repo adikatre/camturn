@@ -1,13 +1,13 @@
 using System.IO.Pipes;
 using CamTurn.Core.Video;
 
-namespace CamTurn.Testing;
+namespace CamTurn.Core.Transport;
 
 /// <summary>
 /// Managed equivalent of the C++ media source's PipeClient: connects to the CamTurn pipe, sends Hello, and keeps
-/// receiving frames. Used by tests and by <c>camturn --pipe-probe</c> to check the app side without Frame Server.
+/// receiving frames. Used by tests and by <c>CamTurn --pipe-probe</c> to check the app side without Frame Server.
 /// </summary>
-public sealed class PipeConsumerClient : IAsyncDisposable
+public sealed class FramePipeClient : IAsyncDisposable
 {
     private readonly NamedPipeClientStream _pipe;
     private readonly CancellationTokenSource _cts = new();
@@ -17,7 +17,7 @@ public sealed class PipeConsumerClient : IAsyncDisposable
     private FrameHeader _latestHeader;
     private int _frames;
 
-    public PipeConsumerClient(string pipeName = FrameProtocol.PipeName)
+    public FramePipeClient(string pipeName = FrameProtocol.PipeName)
     {
         _pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
     }
