@@ -29,7 +29,7 @@ if(WIN32)
   set_property(TARGET camturn_common camturn_portable_tests PROPERTY
                MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-  set(MF_LIBS mfplat mf mfuuid mfsensorgroup propsys ole32 strmiids)
+  set(MF_LIBS mfplat mf mfuuid mfsensorgroup propsys ole32 strmiids runtimeobject)
 
   # The custom media source loaded by Windows Frame Server.
   add_library(camturn_mediasource SHARED
