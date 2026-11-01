@@ -166,12 +166,11 @@ STDMETHODIMP MediaStream::GetEvent(DWORD flags, IMFMediaEvent** event)
     return queue->GetEvent(flags, event);
 }
 
-STDMETHODIMP MediaStream::QueueEvent(MediaEventType type, REFGUID extendedType, HRESULT status,
-                                     const PROPVARIANT* value)
+STDMETHODIMP MediaStream::QueueEvent(MediaEventType type, REFGUID extendedType, HRESULT status, const PROPVARIANT* data)
 {
     auto lock = m_lock.LockShared();
     CT_RETURN_HR_IF(MF_E_SHUTDOWN, !m_queue);
-    return m_queue->QueueEventParamVar(type, extendedType, status, value);
+    return m_queue->QueueEventParamVar(type, extendedType, status, data);
 }
 
 STDMETHODIMP MediaStream::GetMediaSource(IMFMediaSource** source)

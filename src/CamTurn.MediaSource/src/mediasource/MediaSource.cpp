@@ -60,12 +60,11 @@ STDMETHODIMP MediaSource::GetEvent(DWORD flags, IMFMediaEvent** event)
     return queue->GetEvent(flags, event);
 }
 
-STDMETHODIMP MediaSource::QueueEvent(MediaEventType type, REFGUID extendedType, HRESULT status,
-                                     const PROPVARIANT* value)
+STDMETHODIMP MediaSource::QueueEvent(MediaEventType type, REFGUID extendedType, HRESULT status, const PROPVARIANT* data)
 {
     auto lock = m_lock.LockShared();
     CT_RETURN_HR_IF(MF_E_SHUTDOWN, m_shutdown);
-    return m_queue->QueueEventParamVar(type, extendedType, status, value);
+    return m_queue->QueueEventParamVar(type, extendedType, status, data);
 }
 
 STDMETHODIMP MediaSource::CreatePresentationDescriptor(IMFPresentationDescriptor** descriptor)
