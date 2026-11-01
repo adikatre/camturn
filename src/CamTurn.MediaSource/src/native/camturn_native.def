@@ -1,0 +1,5 @@
+LIBRARY camturn_native
+EXPORTS
+    CamTurn_IsVirtualCameraSupported
+    CamTurn_RegisterVirtualCamera
+    CamTurn_UnregisterVirtualCamera

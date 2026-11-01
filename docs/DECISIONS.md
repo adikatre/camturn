@@ -59,6 +59,49 @@ laptop seen so far), so readings stay in the panel frame however the desktop is 
 records readings with the default and with `Landscape`, plus a step with the desktop manually rotated, to
 confirm this on the Inspiron (KNOWN_ISSUES K-4).
 
+## D-007 — Frame transport is a named pipe, not a `Global\` file mapping (2026-11-01)
+
+The media source runs inside Windows Frame Server, as LocalService in session 0 (confirmed in Microsoft's
+Frame Server custom media source docs). The tray app runs in the user's session. A user process can't create a
+`Global\` file mapping without `SeCreateGlobalPrivilege`, and `Local\` names are per-session, so the shared-memory
+design in the handoff would fail on a standard account. Named pipes aren't session-scoped. So the app hosts
+`\\.\pipe\CamTurn.Video.v1` with a DACL for the current user, LocalService and SYSTEM, and rejects remote
+clients. The media source connects as a client only while a stream is running. That connection is the
+"consumer started/stopped" signal, so no separate named events are needed. Every message carries the
+versioned 64-byte header (`protocol.h` / `FrameProtocol.cs`, pinned by the shared golden file
+`tests/fixtures/frame-header-v1.bin`). Throughput is about 41 MB/s at 720p30 NV12 and 93 MB/s at 1080p30. Microsoft's own
+Windows-Camera VirtualCamera sample also uses a named pipe between its media source and its tray process.
+Limitation: one pipe name per machine, so with fast user switching only one user's CamTurn serves frames.
+
+## D-008 — Virtual camera: System lifetime, all users, created by the installer (2026-11-01)
+
+`MFCreateVirtualCamera(SoftwareCameraSource, System, AllUsers, ...)` requires administrator rights (per the API docs),
+so the installer creates it during its single UAC prompt and the uninstaller removes it. The app never needs admin
+rights. The media source CLSID must be registered under HKLM, because Frame Server doesn't read per-user classes.
+Windows appends "Windows Virtual Camera" to the friendly name we pass ("CamTurn Camera"), so apps may show a
+longer name.
+
+## D-009 — `camturn_native.dll` wraps the virtual-camera API (2026-11-01)
+
+`IMFVirtualCamera` inherits `IMFAttributes`. Declaring its vtable correctly in C# is error-prone and untestable here.
+A ~100-line C++ DLL exports `CamTurn_IsVirtualCameraSupported`, `CamTurn_RegisterVirtualCamera` and
+`CamTurn_UnregisterVirtualCamera` for the app to P/Invoke.
+
+## D-010 — Media source design choices (2026-11-01)
+
+- Written from scratch with WRL (part of the Windows SDK) to avoid WIL/C++/WinRT NuGet dependencies. Structure follows
+  Microsoft's Frame Server custom media source documentation, with `smourier/VCamSample` (MIT) as a reference.
+- System-memory samples only (`MFCreate2DMediaBuffer`). `SetD3DManager` is accepted and ignored, as the docs allow.
+  Converting 720p/1080p NV12 on the CPU is cheap.
+- Formats: NV12 and YUY2 at 1280x720@30 and 1920x1080@30. YUY2 is converted from NV12 in the source.
+- If no fresh frame has arrived within 1 s, the source serves a static "CamTurn Camera — waiting" placeholder. It
+  never blocks `RequestSample` and never returns an error to the host app because the CamTurn app is missing.
+- Static CRT, so no VC++ redistributable is needed in the Frame Server process.
+- Alternative not taken (yet): Windows 11 22621+ lets a virtual camera wrap the physical camera inside Frame Server
+  (`MF_VIRTUALCAMERA_ASSOCIATED_CAMERA_SOURCES`). The media source could then rotate frames itself, and the app would
+  only send the orientation. That design is simpler and more private, but harder to build and debug without
+  hardware. Listed in ROADMAP.
+
 ## Open questions
 
 - Repository name/owner (`adikatre/camturn` is a placeholder) and license. Not decided at this stage.
