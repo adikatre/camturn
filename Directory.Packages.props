@@ -8,6 +8,6 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="coverlet.collector" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="10.0.12" />
-    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.12" />
+    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="11.0.0" />
   </ItemGroup>
 </Project>
