@@ -1,6 +1,4 @@
-using CamTurn.Core.Video;
-
-namespace CamTurn.Simulator;
+namespace CamTurn.Core.Video;
 
 /// <param name="RotationCwDegrees">How far the scene appears rotated clockwise in the image, in (-180, 180]; 0 means upright.</param>
 /// <param name="Mirrored">True if left and right are swapped.</param>
@@ -8,11 +6,36 @@ namespace CamTurn.Simulator;
 public readonly record struct UprightResult(double RotationCwDegrees, bool Mirrored, bool Confident);
 
 /// <summary>
-/// Measures how a frame of the <see cref="SceneRenderer"/> scene is oriented, so tests can assert
-/// "the output is upright" without anyone looking at it.
+/// Measures how a frame of the <see cref="TestPattern"/> scene is oriented, so tests (and
+/// <c>CamTurn --probe-virtual-camera</c> on a real Windows machine) can check "the output is upright" without anyone
+/// looking at it.
 /// </summary>
 public static class UprightDetector
 {
+    /// <summary>
+    /// True for the media source's "waiting for CamTurn" placeholder: neutral chroma everywhere (pure greyscale).
+    /// Live camera images and the test pattern always carry colour.
+    /// </summary>
+    public static bool IsPlaceholder(VideoFrame nv12)
+    {
+        if (nv12.Format != PixelFormat.Nv12)
+        {
+            throw new ArgumentException("Expected NV12.", nameof(nv12));
+        }
+
+        var uv = nv12.Stride * nv12.Height;
+        var end = uv + (nv12.Stride * nv12.Height / 2);
+        for (var i = uv; i < end; i += 7)
+        {
+            if (Math.Abs(nv12.Data[i] - 128) > 3)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static UprightResult Detect(VideoFrame frame)
     {
         if (frame.Format == PixelFormat.Nv12)

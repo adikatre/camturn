@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>CamTurn.Testing</RootNamespace>
+    <Description>Fakes and test clients for CamTurn: a managed stand-in for the media source, fake camera, fake virtual-camera registrar.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CamTurn.Core\CamTurn.Core.csproj" />
+  </ItemGroup>
+</Project>
