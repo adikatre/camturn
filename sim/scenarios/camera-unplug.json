@@ -1,0 +1,20 @@
+{
+  "name": "camera-unplug",
+  "description": "Camera opened, disconnected, reconnected, then held busy by another app.",
+  "steps": [
+    { "at": 0, "pose": "laptop", "action": "cameraStart" },
+    { "at": 1.0, "action": "cameraDisconnect" },
+    { "at": 2.0, "action": "cameraReconnect" },
+    { "at": 2.1, "action": "cameraBusy" },
+    { "at": 2.2, "action": "cameraStart" },
+    { "at": 3.0, "action": "cameraFree" },
+    { "at": 3.1, "action": "cameraStart" }
+  ],
+  "expect": [
+    { "at": 0.5, "cameraState": "Streaming" },
+    { "at": 1.5, "cameraState": "Disconnected" },
+    { "at": 2.05, "cameraState": "Closed" },
+    { "at": 2.5, "cameraState": "Busy" },
+    { "at": 3.5, "cameraState": "Streaming" }
+  ]
+}

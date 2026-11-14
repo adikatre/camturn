@@ -1,0 +1,18 @@
+{
+  "name": "tablet-spin",
+  "description": "Folded into tablet and turned through all four orientations.",
+  "steps": [
+    { "at": 0, "pose": "tablet" },
+    { "at": 1.0, "pose": "tablet-portrait-right", "transition": 0.4 },
+    { "at": 2.5, "pose": "tablet-inverted", "transition": 0.4 },
+    { "at": 4.0, "pose": "tablet-portrait-left", "transition": 0.4 },
+    { "at": 5.5, "pose": "tablet", "transition": 0.4 }
+  ],
+  "expect": [
+    { "at": 0.8, "quadrant": 0, "outputUpright": true },
+    { "at": 2.3, "quadrant": 90, "displayRotation": 90, "outputUpright": true },
+    { "at": 3.8, "quadrant": 180, "displayRotation": 180, "outputUpright": true },
+    { "at": 5.3, "quadrant": 270, "displayRotation": 270, "outputUpright": true },
+    { "at": 6.8, "quadrant": 0, "displayRotation": 0, "outputUpright": true }
+  ]
+}

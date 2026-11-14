@@ -1,0 +1,15 @@
+{
+  "name": "base-sensor-only",
+  "description": "Only a base accelerometer is exposed. CamTurn must use base + hinge angle and still get tent mode right.",
+  "device": "dell-inspiron-16-7640-2in1-base-only",
+  "steps": [
+    { "at": 0, "pose": "laptop" },
+    { "at": 1.0, "pose": "tent", "transition": 0.6 },
+    { "at": 3.0, "pose": "tablet-portrait-right", "transition": 0.6 }
+  ],
+  "expect": [
+    { "at": 0.8, "autoAvailable": true, "quadrant": 0 },
+    { "at": 2.5, "quadrant": 180, "outputUpright": true },
+    { "at": 4.5, "quadrant": 90, "outputUpright": true }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "small-tilts-no-flip",
+  "description": "Handheld tablet with jitter and 40-55 degree leans; hysteresis must keep the image steady.",
+  "steps": [
+    { "at": 0, "pose": "tablet", "shake": 6 },
+    { "at": 1.0, "roll": 40, "tilt": 30, "hinge": 360, "shake": 6, "transition": 0.5 },
+    { "at": 2.5, "roll": 320, "tilt": 30, "hinge": 360, "shake": 6, "transition": 0.8 },
+    { "at": 4.0, "roll": 55, "tilt": 30, "hinge": 360, "shake": 3, "transition": 0.8 }
+  ],
+  "expect": [
+    { "at": 0.9, "quadrant": 0 },
+    { "at": 2.0, "quadrant": 0 },
+    { "at": 3.5, "quadrant": 0 },
+    { "at": 5.5, "quadrant": 0 }
+  ]
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>CamTurn.Sim.Cli</RootNamespace>
+    <AssemblyName>camturn-sim</AssemblyName>
+    <Description>Command-line driver for the CamTurn device simulator.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CamTurn.Simulator\CamTurn.Simulator.csproj" />
+  </ItemGroup>
+</Project>
