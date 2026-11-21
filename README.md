@@ -1,6 +1,6 @@
 # CamTurn
 
-**This is a test of Software-on-Demand: Initially created by Opus 5.5 via Claude Code, now being maintained using GPT 6.2 Astra & GPT 6.2 Sol.
+**This is a test of Software-on-Demand: Initially created by Opus 5.5 via Claude Code, now being maintained using GPT 6.2 Astra & GPT 6.2 Sol.**
 
 **Keeps your webcam picture upright on Windows 11 2-in-1 laptops.** When you fold a convertible into tent, stand
 or tablet mode, Windows rotates the screen, but the camera is fixed to the lid. Zoom, Teams, Discord and browsers
