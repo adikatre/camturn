@@ -18,7 +18,7 @@ jobs:
     name: Linux (core, simulator, portable C++)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
@@ -60,7 +60,7 @@ jobs:
     name: Windows (MSVC, WPF, integration tests, portable EXE)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
@@ -90,7 +90,7 @@ jobs:
     # Server SKUs may lack the Frame Server camera stack; this job reports what works rather than gating merges.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v4
         with:
           name: camturn-portable
