@@ -30,10 +30,10 @@ public sealed record CliOptions
           --diagnose                  Redacted report for bug reports (OS, sensors, cameras, virtual camera, settings)
           --list-cameras              Physical cameras and their formats
           --sensor-dump [--duration s] Live accelerometer x/y/z, roll and quadrant as CSV (default 10 s)
-          --register [--current-user] Create "CamTurn Camera" (all users needs administrator; the installer does this)
+          --register [--current-user] Create "CamTurn Camera" (machine-wide registration asks for administrator access)
           --unregister [--current-user] Remove "CamTurn Camera"
           --pipe-probe                Connect to a running CamTurn like the virtual camera would and report frames
-          --set-autostart on|off      Start CamTurn when you sign in (per user; used by the installer)
+          --set-autostart on|off      Start CamTurn when you sign in (per user)
           --probe-virtual-camera      Open "CamTurn Camera" like an app would and check the picture
                                       (exit 0 upright, 3 placeholder, 4 wrong orientation, 1 failed)
           --help

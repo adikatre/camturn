@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -26,15 +27,15 @@ public static class Cli
                 CliCommand.Diagnose => await DiagnoseAsync(),
                 CliCommand.ListCameras => await ListCamerasAsync(),
                 CliCommand.SensorDump => await SensorDumpAsync(o),
-                CliCommand.Register => Register(o),
-                CliCommand.Unregister => Unregister(o),
+                CliCommand.Register => await ChangeCameraAsync(true, o),
+                CliCommand.Unregister => await ChangeCameraAsync(false, o),
                 CliCommand.PipeProbe => await PipeProbeAsync(),
                 CliCommand.SetAutostart => SetAutostart(o.AutostartOn),
                 CliCommand.ProbeVirtualCamera => await ProbeVirtualCameraAsync(),
                 _ => 2,
             };
         }
-        catch (Exception e) when (e is COMException or UnauthorizedAccessException or DllNotFoundException or InvalidOperationException)
+        catch (Exception e) when (e is Win32Exception or IOException or COMException or UnauthorizedAccessException or DllNotFoundException or InvalidOperationException)
         {
             Console.Error.WriteLine($"error: {e.Message} (0x{e.HResult:X8})");
             return 1;
@@ -113,31 +114,10 @@ public static class Cli
         return 0;
     }
 
-    private static int Register(CliOptions o)
+    private static async Task<int> ChangeCameraAsync(bool register, CliOptions o)
     {
-        var registrar = new VirtualCameraRegistrar();
-        var state = registrar.GetState();
-        if (state is VirtualCameraState.Unsupported)
-        {
-            Console.Error.WriteLine("This Windows version has no virtual camera support (Windows 11 build 22000 or newer is required).");
-            return 1;
-        }
-
-        if (state is VirtualCameraState.MediaSourceMissing)
-        {
-            Console.Error.WriteLine("The CamTurn media source is not installed. Reinstall CamTurn.");
-            return 1;
-        }
-
-        registrar.Register(allUsers: !o.CurrentUserOnly);
-        Console.WriteLine("\"CamTurn Camera\" registered.");
-        return 0;
-    }
-
-    private static int Unregister(CliOptions o)
-    {
-        new VirtualCameraRegistrar().Unregister(allUsers: !o.CurrentUserOnly);
-        Console.WriteLine("\"CamTurn Camera\" removed.");
+        await CameraComponent.ChangeAsync(register, o.CurrentUserOnly);
+        Console.WriteLine(register ? "\"CamTurn Camera\" registered." : "\"CamTurn Camera\" removed.");
         return 0;
     }
 
@@ -151,7 +131,7 @@ public static class Cli
         var info = await MediaCaptureCamera.FindVirtualCameraAsync();
         if (info is null)
         {
-            Console.Error.WriteLine("\"CamTurn Camera\" is not listed. Run CamTurn.exe --register as administrator.");
+            Console.Error.WriteLine("\"CamTurn Camera\" is not listed. Run CamTurn.exe --register.");
             return 1;
         }
 

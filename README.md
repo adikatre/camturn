@@ -6,7 +6,7 @@ then show you sideways or upside down. CamTurn runs in the notification area, re
 rotates the camera picture to match, and offers it to every app as a camera called **CamTurn Camera**. It works
 offline, needs no account, and turns your real camera on only while an app is using it.
 
-> **Status: pre-release (0.1.0).** The virtual camera works end to end on Windows CI. It has not yet been tested with
+> **Status: pre-release (0.1.0).** The earlier installer build exercised the virtual camera end to end on Windows CI. The portable package still needs verification. It has not yet been tested with
 > a real webcam, accelerometer or video-call apps. See [What has been tested](#what-has-been-tested) and
 > [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
 
@@ -26,21 +26,24 @@ for example the Dell Inspiron 16 7640 2-in-1 it was developed on.
   API CamTurn relies on (see [FAQ](#faq) and [docs/ROADMAP.md](docs/ROADMAP.md)).
 - A built-in or USB camera.
 - An accelerometer for automatic rotation. Without one, CamTurn still works with a manually chosen rotation.
-- Administrator rights once, to install.
+- Administrator approval to enable the virtual camera on each PC. The tray app and local preview run as a normal user.
 
-## Install
+## Portable app
 
-1. Download `CamTurn-Setup-x.y.z.exe` from the [Releases](https://github.com/adikatre/camturn/releases) page.
-   Optionally check it against the `.sha256` file next to it.
-2. Run it. Windows asks for administrator permission once, because the installer registers the virtual camera
-   for all users.
-3. The installer isn't code-signed yet, so Windows SmartScreen may say "Windows protected your PC". Choose
-   **More info → Run anyway** only if you downloaded it from this repository's Releases page.
+Keep `CamTurn.exe` in a folder of your choice. The Windows x64 build includes the .NET runtime. The release workflow
+packages the EXE and its SHA-256 checksum. Older releases named `CamTurn-Setup-*.exe` are installers.
+
+Double-click the EXE to start CamTurn in the notification area. Look under **Show hidden icons** if needed.
+Double-click the tray icon or choose **Open settings** from its menu. The first time, this opens a short setup
+wizard. Minimizing hides the window and stops its preview. Double-click the icon again to restore it.
+Choose **Quit CamTurn** from the tray menu to exit. Starting with Windows is opt-in. If you move the EXE after
+enabling that option, turn it off and back on in Settings to update the path.
 
 ## Quick start
 
-1. After installing, CamTurn opens a short setup wizard. It checks your Windows version and the virtual camera,
-   lets you pick your camera, and runs a rotation test.
+1. In the wizard, choose **Create "CamTurn Camera"** when you want video apps to see it. Windows asks for
+   administrator approval to put the camera component in `%ProgramFiles%\CamTurn Camera` and register it on
+   that PC. You can skip this step for local preview and enable it later under **Settings → Register virtual camera**.
 2. In your video app, pick **CamTurn Camera** as the camera. Windows may list it as "CamTurn Camera Windows
    Virtual Camera".
    - Zoom: Settings → Video → Camera
@@ -107,7 +110,7 @@ offers no supported way to change its picture for all apps. A virtual camera tha
 supported way to do it.
 
 **Why not a Windows service?** The sensor and your camera's privacy settings belong to your user session. A
-per-user tray app never needs to run with elevated rights. The only privileged step is the one-time install.
+per-user tray app never needs to run with elevated rights. Windows asks for administrator access when you register or remove the camera component.
 
 **Do I need OBS or other streaming software?** No. CamTurn does not need it and does not use it.
 
@@ -119,7 +122,7 @@ per-user tray app never needs to run with elevated rights. The only privileged s
 - Portrait orientations show black bars (or a cropped picture), because the output size is fixed.
 - Only one Windows user at a time can feed CamTurn Camera (fast user switching shares a single frame pipe).
 - Some apps cache their camera list. Restart the app if CamTurn Camera doesn't appear.
-- Unsigned installer: SmartScreen warns until code signing is set up.
+- The portable executable is unsigned. Windows SmartScreen may show a warning.
 
 ## Privacy
 
@@ -133,17 +136,21 @@ to the Windows camera service on the same PC, and are never stored or sent anywh
 | Problem | Try |
 |---|---|
 | CamTurn Camera isn't listed in an app | Restart the app. In CamTurn settings, check **Status → Virtual camera**; if it says "Not registered", click **Register virtual camera**. |
-| Picture shows "Waiting for CamTurn" | CamTurn isn't running, or the camera couldn't open. Start CamTurn from the Start menu and check the status panel. |
+| Picture shows "Waiting for CamTurn" | CamTurn isn't running, or the camera couldn't open. Open the portable CamTurn.exe and check the status panel. |
 | "Camera busy or blocked" | Close other apps that use the real camera directly. Check **Settings → Privacy & security → Camera → Let desktop apps access your camera**. |
 | Picture rotates the wrong way | **Settings → Orientation mapping → Flip direction**. |
 | Picture flips while the laptop lies flat | It shouldn't: CamTurn holds the last orientation when the device is flat. Please report it with diagnostics. |
 | Anything else | Run `CamTurn.exe --diagnose` (or click **Copy diagnostics**) and attach the output to a [bug report](https://github.com/adikatre/camturn/issues/new?template=bug_report.yml). |
 
-## Uninstall
+## Remove CamTurn
 
-**Settings → Apps → Installed apps → CamTurn → Uninstall.** This removes the program, the CamTurn Camera
-device, the media source registration, your autostart entry, and your settings and logs. If Windows was still
-using the media source, its DLL is deleted at the next restart.
+If you enabled **Start with Windows**, turn it off in CamTurn settings. Choose **Quit CamTurn** in the tray and
+delete the portable EXE. If you enabled the virtual camera, remove **CamTurn Camera** under
+**Windows Settings → Apps → Installed apps**. You can also remove the component with `CamTurn.exe --unregister`
+before deleting the EXE. Close apps using the camera first.
+
+Preferences and logs are per PC. To clear them, delete `%APPDATA%\CamTurn` and `%LOCALAPPDATA%\CamTurn`.
+The bundled runtime also uses a per-user extraction cache, normally under `%TEMP%\.net\CamTurn`.
 
 ## What has been tested
 
@@ -151,11 +158,9 @@ using the media source, its DLL is deleted at the next restart.
   orientation hysteresis, compositor, camera on/off logic, settings, and the frame protocol. Tests also run the
   whole app pipeline over a real named pipe, driven by a simulator of the Inspiron 16 7640 2-in-1 (`camturn-sim`,
   [docs/SIMULATOR.md](docs/SIMULATOR.md)). The C++ protocol and placeholder code are tested too.
-- **Windows CI, on every change:** builds the C++ media source with MSVC and the WPF app, runs the tests, launches
-  `CamTurn.exe`, and builds the installer. Then, on Windows Server 2025, it installs CamTurn, opens "CamTurn Camera"
-  the way an app would, and checks that Windows' camera service loads CamTurn's media source. The placeholder
-  shows without the app, and the **upright test pattern** shows with `--test-pattern --simulate-orientation 180`.
-  It then uninstalls and checks for leftovers.
+- **Portable Windows workflow:** configured to build the single EXE, launch an isolated copy on a CI runner,
+  then check camera registration, placeholder and test-pattern delivery, and component removal on Windows Server
+  2025. These checks have not been run against this revision.
 - **Not yet done:** the real webcam and accelerometer, the settings UI, and Zoom, Teams, Meet and Discord on the
   developer's laptop. See [docs/TESTING.md](docs/TESTING.md).
 

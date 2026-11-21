@@ -50,4 +50,7 @@ if(WIN32)
   target_compile_definitions(camturn_native PRIVATE UNICODE _UNICODE)
   target_compile_options(camturn_native PRIVATE /W4 /WX /permissive-)
   set_property(TARGET camturn_native PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+  add_executable(camturn_camera_control src/native/camera_control.cpp)
+  target_link_libraries(camturn_camera_control PRIVATE camturn_native)
 endif()

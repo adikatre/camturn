@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -17,7 +18,7 @@ using CamTurn.Platform.Windows;
 namespace CamTurn.App.ViewModels;
 
 /// <summary>Settings window state. Every change is applied and saved immediately (no OK/Apply button).</summary>
-public sealed class SettingsViewModel : Observable
+public sealed class SettingsViewModel : Observable, IDisposable
 {
     private readonly AppHost _host;
     private bool _loading;
@@ -76,12 +77,16 @@ public sealed class SettingsViewModel : Observable
 
         LoadFrom(host.Config);
         _status = host.Status;
-        host.StatusChanged += (_, s) => Application.Current?.Dispatcher.BeginInvoke(() =>
-        {
-            _status = s;
-            RaiseStatus();
-        });
+        host.StatusChanged += OnStatusChanged;
     }
+
+    public void Dispose() => _host.StatusChanged -= OnStatusChanged;
+
+    private void OnStatusChanged(object? sender, EngineStatus status) => Application.Current?.Dispatcher.BeginInvoke(() =>
+    {
+        _status = status;
+        RaiseStatus();
+    });
 
     public ObservableCollection<Choice<string?>> Cameras { get; } = [];
 
@@ -256,15 +261,15 @@ public sealed class SettingsViewModel : Observable
     public async Task RefreshVirtualCameraAsync()
     {
         var (state, path) = await Task.Run(() => (new VirtualCameraRegistrar().GetState(), VirtualCameraRegistrar.MediaSourcePath()));
-        MediaSourceText = path is null ? "Not installed" : "Installed";
+        MediaSourceText = File.Exists(path) ? "Available" : "Missing";
         VirtualCameraText = state switch
         {
             VirtualCameraState.Registered => "Registered: select \"CamTurn Camera\" in your apps",
             VirtualCameraState.NotRegistered => "Not registered",
-            VirtualCameraState.MediaSourceMissing => "Media source missing: reinstall CamTurn",
+            VirtualCameraState.MediaSourceMissing => "Choose Register virtual camera to enable it on this PC",
             _ => "Not supported on this Windows version (Windows 11 required)",
         };
-        RepairNeeded = state is VirtualCameraState.NotRegistered;
+        RepairNeeded = state is VirtualCameraState.NotRegistered or VirtualCameraState.MediaSourceMissing;
     }
 
     private async Task LoadCamerasAsync()
@@ -381,22 +386,20 @@ public sealed class SettingsViewModel : Observable
         CopyLabel = "Copy diagnostics";
     }
 
-    /// <summary>Runs "CamTurn --register" elevated (the only UAC prompt outside the installer).</summary>
     private async void Repair()
     {
         try
         {
-            using var p = Process.Start(new ProcessStartInfo(Environment.ProcessPath!, "--register") { UseShellExecute = true, Verb = "runas" });
-            if (p is not null)
-            {
-                await p.WaitForExitAsync();
-            }
+            await CameraComponent.ChangeAsync(register: true, currentUserOnly: false);
+            await RefreshVirtualCameraAsync();
         }
-        catch (Win32Exception)
+        catch (Win32Exception e) when (e.NativeErrorCode == 1223)
         {
-            // UAC prompt declined.
+            VirtualCameraText = "Camera registration canceled.";
         }
-
-        await RefreshVirtualCameraAsync();
+        catch (Exception e) when (e is Win32Exception or IOException or UnauthorizedAccessException or InvalidOperationException or COMException)
+        {
+            VirtualCameraText = e.Message;
+        }
     }
 }

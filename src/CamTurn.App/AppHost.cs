@@ -33,6 +33,7 @@ public sealed class AppHost : IAsyncDisposable
     private ICameraSource? _camera;
     private bool _locked;
     private bool _paused;
+    private bool _previewActive;
 
     public AppHost(CliOptions options)
     {
@@ -156,7 +157,11 @@ public sealed class AppHost : IAsyncDisposable
         }
     }
 
-    public void SetPreviewActive(bool active) => _engine?.SetPreviewActive(active);
+    public void SetPreviewActive(bool active)
+    {
+        _previewActive = active;
+        _engine?.SetPreviewActive(active);
+    }
 
     public async Task<string> DiagnosticsAsync() => await DiagnosticsReport.BuildAsync(Config, _engine?.Status, Log);
 
@@ -267,6 +272,7 @@ public sealed class AppHost : IAsyncDisposable
             engine.Start();
             engine.SetSessionLocked(_locked);
             engine.SetPaused(_paused);
+            engine.SetPreviewActive(_previewActive);
             _engine = engine;
             StatusChanged?.Invoke(this, engine.Status);
         }

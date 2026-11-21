@@ -4,7 +4,7 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- Never elevated at runtime. Only the installer and the repair button start the register and unregister commands elevated. -->
+        <!-- The tray runs as the current user. Only the optional camera component tool requests elevation. -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>

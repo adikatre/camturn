@@ -1,4 +1,3 @@
-using System;
 using System.Windows;
 using CamTurn.App.ViewModels;
 
@@ -17,16 +16,25 @@ public partial class SettingsWindow : Window
         _vm = new SettingsViewModel(host);
         DataContext = _vm;
         _preview = new PreviewRenderer(Preview, Dispatcher, () => PreviewPlaceholder.Visibility = Visibility.Collapsed);
-        Loaded += async (_, _) =>
+        Loaded += async (_, _) => await _vm.LoadAsync();
+        IsVisibleChanged += (_, _) =>
         {
-            _host.PreviewFrame += _preview.OnFrame;
-            _host.SetPreviewActive(true);
-            await _vm.LoadAsync();
+            if (IsVisible)
+            {
+                _host.PreviewFrame += _preview.OnFrame;
+            }
+            else
+            {
+                _host.PreviewFrame -= _preview.OnFrame;
+            }
+
+            _host.SetPreviewActive(IsVisible);
         };
         Closed += (_, _) =>
         {
             _host.PreviewFrame -= _preview.OnFrame;
             _host.SetPreviewActive(false);
+            _vm.Dispose();
         };
     }
 

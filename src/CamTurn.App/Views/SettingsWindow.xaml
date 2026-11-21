@@ -28,7 +28,7 @@
         </Grid>
       </Border>
       <TextBlock DockPanel.Dock="Top" Style="{StaticResource Hint}" Margin="0,8,0,0"
-                 Text="The camera light is on while this window is open because the preview uses the camera. It turns off a few seconds after you close the window, unless an app is using CamTurn Camera." />
+                 Text="The camera light is on while this window is open because the preview uses the camera. It turns off a few seconds after you minimize or close the window, unless an app is using CamTurn Camera." />
 
       <TextBlock DockPanel.Dock="Top" Text="Status" Style="{StaticResource SectionHeader}" />
       <Grid DockPanel.Dock="Top">

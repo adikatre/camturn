@@ -24,7 +24,7 @@
 
       <!-- 2. Virtual camera -->
       <StackPanel x:Name="Step2" Visibility="Collapsed">
-        <TextBlock TextWrapping="Wrap" Text="Apps see CamTurn as a separate camera. The installer normally creates it for you." />
+        <TextBlock TextWrapping="Wrap" Text="Apps see CamTurn as a separate camera. Choose Create to enable it on this PC, or choose Next to use the preview only." />
         <TextBlock Margin="0,16,0,0" FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding VirtualCameraText}" />
         <Button Content="Create &quot;CamTurn Camera&quot; (asks for administrator permission)" Command="{Binding RepairCommand}"
                 HorizontalAlignment="Left" Padding="12,6" Margin="0,12,0,0" />

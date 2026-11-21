@@ -36,7 +36,7 @@ public static class Program
         if (!first)
         {
             // Already running: ask that instance to show its settings window.
-            if (EventWaitHandle.TryOpenExisting(ShowEventName, out var show))
+            if (!options.Minimized && EventWaitHandle.TryOpenExisting(ShowEventName, out var show))
             {
                 show.Set();
                 show.Dispose();

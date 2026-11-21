@@ -38,7 +38,12 @@ public partial class FirstRunWindow : Window
             : $"✗ This is Windows build {build}. CamTurn needs Windows 11 (build 22000 or newer) for its virtual camera.";
 
         Loaded += async (_, _) => await _vm.LoadAsync();
-        Closed += (_, _) => SetPreview(false);
+        IsVisibleChanged += (_, _) => SetPreview(IsVisible && _step == 3);
+        Closed += (_, _) =>
+        {
+            SetPreview(false);
+            _vm.Dispose();
+        };
         Show(0);
     }
 
@@ -54,7 +59,7 @@ public partial class FirstRunWindow : Window
         StepCounter.Text = $"Step {step + 1} of {_steps.Length}";
         BackButton.IsEnabled = step > 0;
         NextButton.Content = step == _steps.Length - 1 ? "_Finish" : "_Next";
-        SetPreview(step == 3);
+        SetPreview(IsVisible && step == 3);
     }
 
     private void SetPreview(bool on)

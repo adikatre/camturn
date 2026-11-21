@@ -15,7 +15,7 @@ src/
   CamTurn.Testing/           fakes: FakeCamera, NullVirtualCamera, test pipes
 tests/                       Core, Simulator (incl. end-to-end over a real pipe), Windows integration; fixtures/
 sim/                         device profiles and scenarios
-installer/                   Inno Setup script
+installer/                   optional camera component packaging
 build/                       build-windows.ps1, smoke-test.ps1
 scripts/                     probe-device.ps1 (hardware probe), bootstrap-dotnet.sh, check-no-streaming-deps.sh
 assets/                      icon generator and generated icons
@@ -29,14 +29,14 @@ assets/                      icon generator and generated icons
 | Platform.Windows, App, Windows tests | **build only** (`EnableWindowsTargeting`) | build + run |
 | Media source: portable code + tests | build + run (g++/clang) | build + run (MSVC) |
 | Media source and helper DLLs | – | build (MSVC) |
-| Installer | – | Inno Setup 6 |
+| Portable EXE and optional camera component | – | .NET publish and Inno Setup 6 |
 
 ## Prerequisites
 
 - .NET 10 SDK (10.0.100 or newer feature band; `global.json`). On a fresh Linux container: `scripts/bootstrap-dotnet.sh`.
 - Windows: Visual Studio 2022 (or Build Tools) with **Desktop development with C++** (MSVC v143, Windows 11
   SDK 10.0.22621 or newer, C++ CMake tools) and the **.NET desktop development** workload, and
-  [Inno Setup 6](https://jrsoftware.org/isinfo.php) for the installer.
+  [Inno Setup 6](https://jrsoftware.org/isinfo.php) for the embedded camera component.
 
 ## Everyday commands
 
@@ -53,44 +53,23 @@ dotnet test tests/CamTurn.Simulator.Tests
 dotnet format CamTurn.sln --verify-no-changes
 ```
 
-On Windows, the full build (native DLLs, tests, self-contained publish, installer):
+To build the portable app and run the existing checks on a Windows development machine, use
 
 ```powershell
 ./build/build-windows.ps1
 ```
 
-## Running a dev build without the installer (Windows, admin once)
+The distributable is `artifacts\portable\CamTurn.exe`, with a SHA-256 checksum alongside it.
+Pass `-SkipTests` to build without running tests or launching the published app.
 
-The media source must be registered under HKLM, and Frame Server (LocalService) must be able to read the DLL, so
-**don't** register it from a folder under your user profile. From an elevated PowerShell in the repository:
+## Using the portable build
 
-```powershell
-./build/build-windows.ps1 -SkipInstaller
-```
-```powershell
-New-Item -ItemType Directory -Force C:\CamTurnDev | Out-Null; Copy-Item artifacts\publish\* C:\CamTurnDev -Recurse -Force
-```
-```powershell
-$clsid = '{EF0883BB-0F68-4106-B1D3-3B3B786D600D}'; New-Item -Force "HKLM:\SOFTWARE\Classes\CLSID\$clsid\InprocServer32" | Out-Null; Set-ItemProperty "HKLM:\SOFTWARE\Classes\CLSID\$clsid" '(default)' 'CamTurn Media Source'; Set-ItemProperty "HKLM:\SOFTWARE\Classes\CLSID\$clsid\InprocServer32" '(default)' 'C:\CamTurnDev\camturn_mediasource.dll'; Set-ItemProperty "HKLM:\SOFTWARE\Classes\CLSID\$clsid\InprocServer32" 'ThreadingModel' 'Both'
-```
-```powershell
-C:\CamTurnDev\CamTurn.exe --register
-```
-
-Then, as your normal user:
-
-```powershell
-C:\CamTurnDev\CamTurn.exe --test-pattern --simulate-orientation 180
-```
-
-To unregister the dev build (elevated):
-
-```powershell
-C:\CamTurnDev\CamTurn.exe --unregister; Remove-Item -Recurse "HKLM:\SOFTWARE\Classes\CLSID\{EF0883BB-0F68-4106-B1D3-3B3B786D600D}"
-```
-
-If Frame Server still has the DLL loaded, restart the "Windows Camera Frame Server" service or reboot before
-replacing it.
+The EXE runs under the current user. Double-click its tray icon for setup and settings. The camera registration
+button launches the embedded camera component tool with administrator approval. The component has a fixed
+location in Program Files so Frame Server can still load it after the portable app moves. Use
+`CamTurn.exe --register` and `CamTurn.exe --unregister` for the equivalent command-line operations.
+An existing camera from the older installer can serve the portable app. To transfer management of that camera,
+remove the older installation before registering the portable build's component.
 
 ## Debugging tips
 

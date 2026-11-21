@@ -17,6 +17,17 @@
     <!-- ThemeMode (Fluent light/dark that follows Windows) is marked experimental in WPF. -->
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
   </PropertyGroup>
+  <!-- The self-extracting bundle keeps WPF, native DLLs and device profiles in the same runtime directory. -->
+  <PropertyGroup Condition="'$(CameraPayload)' != ''">
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(CameraPayload)' != ''">
+    <AssemblyMetadata Include="CameraComponentHash" Value="$(CameraComponentHash)" />
+    <Content Include="$(CameraPayload)\camturn_native.dll;$(CameraPayload)\CamTurn.CameraComponent.exe;..\..\LICENSE;..\..\THIRD_PARTY_NOTICES.md"
+             Link="%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
   <ItemGroup>
     <!-- Program.Main owns startup (CLI commands, single instance), so App.xaml is a Page, not the ApplicationDefinition. -->
     <ApplicationDefinition Remove="App.xaml" />

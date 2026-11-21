@@ -48,12 +48,12 @@ It covers the HKCU autostart round trip, the pipe DACL contents (user, LocalServ
 denied), a pipe round trip with real ACLs, virtual camera state reporting, sensor and camera enumeration, diagnostics
 redaction, and CLI parsing. On machines without sensors or cameras, those tests only check that the APIs answer.
 
-`build/smoke-test.ps1 -Installer <setup.exe>`:
-1. Installs silently and checks the HKLM registration and that "CamTurn Camera" is visible to apps.
+`build/smoke-test.ps1 -PortableExe <path-to-CamTurn.exe>` checks the portable package on a fresh VM.
+1. Runs diagnostics before registration, enables the optional camera and checks the HKLM registration and that "CamTurn Camera" is visible to apps.
 2. Runs `--probe-virtual-camera` without the app (expects the media source's placeholder).
 3. Starts `--test-pattern --simulate-orientation 180`, runs `--pipe-probe`, and runs `--probe-virtual-camera` again
    (expects the upright test pattern through Frame Server: acceptance criterion 1 without a human).
-4. Uninstalls and checks for leftovers.
+4. Removes the optional camera and checks that the EXE is still available.
 
 CI runs it on Windows Server 2025. Run it on a fresh Windows 11 VM for acceptance criterion 6.
 
@@ -62,7 +62,7 @@ dependency fails the build. `scripts/check-xml.py` rejects malformed XML (manife
 
 ## 3. Manual plan on the laptop (run: not yet)
 
-Prerequisites: install the CI-built installer, and keep `CamTurn.exe --diagnose` output for the report. For each
+Prerequisites: use the CI-built portable EXE and enable its virtual camera, and keep `CamTurn.exe --diagnose` output for the report. For each
 row, record pass/fail, the app version and notes.
 
 ### Virtual camera basics
@@ -104,14 +104,14 @@ row, record pass/fail, the app version and notes.
 | P1 | 1080p30 camera into a 1280×720 consumer, in tent mode, for 2 minutes; Task Manager → Details → CamTurn.exe CPU | Average CPU %. Target < 10% |
 | P2 | Same with a 1920×1080 consumer | Average CPU % |
 
-### Install / uninstall (acceptance 5 and 6)
+### Portable launch and removal (acceptance 5 and 6)
 | # | Step | Expected |
 |---|---|---|
-| I1 | Fresh Windows 11 VM: run the installer | Exactly one UAC prompt; wizard opens; CamTurn Camera listed in the Camera app |
+| I1 | Fresh Windows 11 VM: open the EXE and double-click its tray icon | Launch shows only a tray icon. Enabling the camera in the wizard requests administrator approval and adds CamTurn Camera |
 | I2 | Use CamTurn without admin rights afterwards | No further UAC prompts |
-| I3 | Close the settings window | CamTurn stays in the tray |
+| I3 | Minimize settings, restore it from the tray, then close it | No minimized taskbar window. Preview releases when hidden and resumes on restore |
 | I4 | Tray → Quit | Process exits; camera light off; pipe gone |
-| I5 | Uninstall | CamTurn Camera disappears from apps; `HKLM\Software\Classes\CLSID\{EF0883BB-…}` gone; `C:\Program Files\CamTurn` gone (or gone after reboot); HKCU Run value gone; `%APPDATA%\CamTurn` gone |
+| I5 | Remove CamTurn Camera in Windows Installed apps | CamTurn Camera and its COM registration are removed. The portable EXE can still open the preview. |
 | I6 | `build/smoke-test.ps1` on the VM | All checks pass |
 
 ## What has not been run yet

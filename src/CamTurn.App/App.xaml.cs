@@ -12,7 +12,7 @@ public partial class App : Application
     private readonly CliOptions _options;
     private AppHost? _host;
     private TrayIcon? _tray;
-    private SettingsWindow? _settings;
+    private Window? _settings;
     private EventWaitHandle? _showEvent;
     private RegisteredWaitHandle? _showWait;
 
@@ -51,11 +51,7 @@ public partial class App : Application
             _host.Log.Write(LogLevel.Error, $"Startup failed: {ex}");
         }
 
-        if (!_host.Config.FirstRunCompleted)
-        {
-            new FirstRunWindow(_host).Show();
-        }
-        else if (!_options.Minimized && !_host.Config.StartMinimized)
+        if (!_options.Minimized && !_host.Config.StartMinimized)
         {
             ShowSettings();
         }
@@ -68,14 +64,25 @@ public partial class App : Application
             return;
         }
 
-        if (_settings is { IsLoaded: true })
+        if (_settings is null)
         {
-            _settings.Activate();
-            return;
+            var window = _host.Config.FirstRunCompleted ? (Window)new SettingsWindow(_host) : new FirstRunWindow(_host);
+            _settings = window;
+            window.StateChanged += (_, _) =>
+            {
+                if (window.WindowState == WindowState.Minimized)
+                {
+                    window.Hide();
+                }
+            };
+            window.Closed += (_, _) => _settings = null;
         }
 
-        _settings = new SettingsWindow(_host);
-        _settings.Closed += (_, _) => _settings = null;
+        if (_settings.WindowState == WindowState.Minimized)
+        {
+            _settings.WindowState = WindowState.Normal;
+        }
+
         _settings.Show();
         _settings.Activate();
     }
@@ -85,6 +92,7 @@ public partial class App : Application
         _tray?.Dispose();
         _showWait?.Unregister(null);
         _showEvent?.Dispose();
+        _settings?.Close();
         if (_host is not null)
         {
             await _host.DisposeAsync();
